@@ -1,4 +1,4 @@
-from alib import datamodel, scenariogeneration
+from alib3 import datamodel, scenariogeneration
 
 
 def create_test_substrate_topology_zoo():

@@ -54,6 +54,9 @@ class MockVar(object):
     def __repr__(self):
         return "MockVar({})".format(self.name)
 
+    def __hash__(self):
+        return hash(self.__repr__())
+
 
 class MockModel(object):
     def __init__(self, name):

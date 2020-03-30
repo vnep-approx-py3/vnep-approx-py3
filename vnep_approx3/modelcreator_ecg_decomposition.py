@@ -25,12 +25,12 @@ import time
 
 from gurobipy import GRB, LinExpr
 
-from alib import solutions, util, modelcreator, datamodel
+from alib3 import solutions, util, modelcreator, datamodel
 from . import extendedcactusgraph
 from collections import deque
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -115,6 +115,8 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
         # filter node placement according to substrate capacities create extended graphs
         for req in self.requests:
             self.extended_graphs[req] = extendedcactusgraph.ExtendedCactusGraph(req, self.scenario.substrate)
+            self.logger.info(self.extended_graphs[req])
+            self.logger.info(self.extended_graphs[req].bfs_request.edges)
 
     def create_variables_other_than_embedding_decision_and_request_load(self):
         # source/sink node flow induction variables
@@ -123,10 +125,10 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
             ext_graph = self.extended_graphs[req]
             if ext_graph is None:
                 continue
-            for i, ecg_node_dict in ext_graph.source_nodes.iteritems():
+            for i, ecg_node_dict in ext_graph.source_nodes.items():
                 if i not in self.var_node_flow[req]:
                     self.var_node_flow[req][i] = {}
-                for u, ecg_node in ecg_node_dict.iteritems():
+                for u, ecg_node in ecg_node_dict.items():
                     if u in self.var_node_flow[req][i]:
                         continue
                     variable_id = modelcreator.construct_name("flow_induction", req_name=req.name, vnode=i, snode=u)
@@ -135,10 +137,10 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
                                                                       obj=0.0,
                                                                       vtype=GRB.BINARY,
                                                                       name=variable_id)
-            for i, ecg_node_dict in ext_graph.sink_nodes.iteritems():
+            for i, ecg_node_dict in ext_graph.sink_nodes.items():
                 if i not in self.var_node_flow[req]:
                     self.var_node_flow[req][i] = {}
-                for u, ecg_node in ecg_node_dict.iteritems():
+                for u, ecg_node in ecg_node_dict.items():
                     if u in self.var_node_flow[req][i]:
                         continue
                     variable_id = modelcreator.construct_name("flow_induction", req_name=req.name, vnode=i, snode=u)
@@ -210,7 +212,7 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
     def _add_constraint_root_flow_induction(self, req):
         ext_graph = self.extended_graphs[req]
         root = ext_graph.root
-        root_source_nodes = ext_graph.source_nodes[root].keys()  # this list contains all source nodes associated with the request root
+        root_source_nodes = list(ext_graph.source_nodes[root].keys())  # this list contains all source nodes associated with the request root
 
         expr = LinExpr([(-1.0, self.var_embedding_decision[req])] +
                        [(1.0, self.var_node_flow[req][root][u]) for u in root_source_nodes])
@@ -438,7 +440,7 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
                 if u not in valid_substrate_nodes:
                     continue
                 constraints[(i_type, u)].append((i_demand, self.var_node_flow[req][i][u]))
-        for key, expr in constraints.iteritems():
+        for key, expr in constraints.items():
             expr = LinExpr(expr)
             tau, u = key
             constr_name = modelcreator.construct_name("substrate_track_node_load",
@@ -494,7 +496,7 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
                                 demand = req.get_edge_demand(ij)
                             constraints[(u, v)].append((demand, self.var_edge_flow[req][ext_edge]))
 
-        for key, expr in constraints.iteritems():
+        for key, expr in constraints.items():
             expr = LinExpr(expr)
             u, v = key
             constr_name = modelcreator.construct_name("substrate_track_edge_load",
@@ -506,9 +508,9 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
     def recover_fractional_solution_from_variables(self):
         self.logger.info("Recovering fractional solution for {}".format(self.scenario.name))
 
-        flow_dict_start_time = time.clock()
+        flow_dict_start_time = time.perf_counter()
         flow_values = self.make_flow_variable_dict()
-        flow_dict_end_time = time.clock()
+        flow_dict_end_time = time.perf_counter()
 
         # Since the generation of the flow variable dictionary
         # is an implementation detail to separate the modelcreator
@@ -545,7 +547,7 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
             for mapping, flow, load in mapping_flow_load_list:
                 self.solution.add_mapping(req, mapping, flow, load)
 
-        self._end_time_recovering_fractional_solution = time.clock()
+        self._end_time_recovering_fractional_solution = time.perf_counter()
         self.logger.info("Time to extract flow values from model:         {:.5f}".format(flow_dict_end_time - flow_dict_start_time))
         self.logger.info("Time to decompose solution from flow variables: {:.5f}".format(
             self._end_time_recovering_fractional_solution - flow_dict_end_time
@@ -585,11 +587,11 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
             result[req.name] = {
                 "embedding": self.var_embedding_decision[req].X,
                 "node": {
-                    i: {u: var.X for (u, var) in u_var_dict.iteritems() if var.X > self.decomposition_epsilon}
-                    for (i, u_var_dict) in self.var_node_flow[req].iteritems()
+                    i: {u: var.X for (u, var) in u_var_dict.items() if var.X > self.decomposition_epsilon}
+                    for (i, u_var_dict) in self.var_node_flow[req].items()
                 },
                 "edge": {
-                    ext_edge: var.X for (ext_edge, var) in self.var_edge_flow[req].iteritems() if var.X > self.decomposition_epsilon
+                    ext_edge: var.X for (ext_edge, var) in self.var_edge_flow[req].items() if var.X > self.decomposition_epsilon
                 }
             }
         return result
@@ -630,7 +632,7 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
 
     def _fix_mapping_of_source_sink_nodes(self, req, ext_graph, mapping):
         # fix mappings of source/sink nodes
-        for i, u in mapping.mapping_nodes.iteritems():
+        for i, u in mapping.mapping_nodes.items():
             if i in ext_graph.source_nodes:
                 force_embedding_constraint = LinExpr([(1.0, self.var_node_flow[req][i][u])])
                 name = modelcreator.construct_name("force_mapping", req_name=req.name, snode=u, vnode=i)
@@ -663,6 +665,10 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
             # fix the edges
             is_reversed_edge = ij in ext_graph.reversed_request_edges or (j, i) in ext_graph.reversed_request_edges
 
+            original_edge = ij
+            if is_reversed_edge:
+                original_edge = j,i
+
             if is_reversed_edge:  # need to reverse mapped path
                 uv_list = [(v, u) for (u, v) in reversed(mapping.mapping_edges[j, i])]
             else:
@@ -670,7 +676,7 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
             if not uv_list:
                 continue
             for (u, v) in self.substrate.edges:
-                if (u, v) not in self.substrate.get_valid_edges(req.get_edge_demand(ij)):
+                if (u, v) not in self.substrate.get_valid_edges(req.get_edge_demand(original_edge)):
                     continue
                 if is_reversed_edge:
                     u, v = v, u
@@ -799,10 +805,10 @@ class Decomposition(object):
 
         self.flow_values["embedding"] = min(1.0, self.flow_values["embedding"] * self.scaling_factor)
 
-        for vnode in self.flow_values["node"].keys():
-            for snode in self.flow_values["node"][vnode].keys():
+        for vnode in list(self.flow_values["node"].keys()):
+            for snode in list(self.flow_values["node"][vnode].keys()):
                 self.flow_values["node"][vnode][snode] = min(1.0, self.flow_values["node"][vnode][snode] * self.scaling_factor)
-        for eedge in self.flow_values["edge"].keys():
+        for eedge in list(self.flow_values["edge"].keys()):
             self.flow_values["edge"][eedge] = min(1.0, self.flow_values["edge"][eedge] * self.scaling_factor)
 
 
@@ -938,7 +944,7 @@ class Decomposition(object):
             u, ext_node = value
             return max(self.flow_values["edge"].get(eedge, 0.0) for eedge in self.ext_graph.out_edges[ext_node])
 
-        u, ext_node = max(self.ext_graph.source_nodes[root].iteritems(), key=outgoing_flow_func)
+        u, ext_node = max(iter(self.ext_graph.source_nodes[root].items()), key=outgoing_flow_func)
 
         ext_node_outflow = outgoing_flow_func((u, ext_node))
 
@@ -975,8 +981,8 @@ class Decomposition(object):
             return max(self.flow_values["edge"].get((eetail, eehead), 0.0)  for (eetail, eehead) in ext_graph.out_edges[ext_source] if eehead in path.extended_nodes)
 
         #end_node, path = max(branch.iteritems(), key=outgoing_flow_of_path)
-        value_list = [outgoing_flow_of_path((key, value)) for (key, value) in branch.iteritems()]
-        end_node, path = max(branch.iteritems(), key=outgoing_flow_of_path)
+        value_list = [outgoing_flow_of_path((key, value)) for (key, value) in branch.items()]
+        end_node, path = max(iter(branch.items()), key=outgoing_flow_of_path)
 
         if outgoing_flow_of_path((end_node, path)) > self.decomposition_epsilon:
             chosen_path = path
@@ -990,7 +996,7 @@ class Decomposition(object):
     def _choose_flow_path_in_extended_path(self, path, mapping, sink_nodes=None):
         # if a sink node is specified, we search the extended graph until that node is reached. Otherwise, all sink nodes are viable:
         if sink_nodes is None:
-            sink_nodes =  self.ext_graph.sink_nodes[path.end_node].values()
+            sink_nodes =  list(self.ext_graph.sink_nodes[path.end_node].values())
             # sink_nodes = [sink for sink in self.ext_graph.sink_nodes[path.end_node].values() if self.flow_values["node"][path.end_node].get(self.ext_graph.get_associated_original_resources(sink)[1], 0.0) >= self.decomposition_epsilon]
             # self.logger.info("All sink nodes vs. actual sink nodes:\n{}\n{}".format(all_sink_nodes, sink_nodes))
         ext_source = self.ext_graph.source_nodes[path.start_node][mapping.mapping_nodes[path.start_node]]

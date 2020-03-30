@@ -1,12 +1,12 @@
 import pytest
 
-from vnep_approx import treewidth_model
-from test_data.request_test_data import create_test_request, example_requests
+from vnep_approx3 import treewidth_model
+from .test_data.request_test_data import create_test_request, example_requests
 
-from test_data.tree_decomposition_test_data import PACE_INPUT_FORMAT
+from .test_data.tree_decomposition_test_data import PACE_INPUT_FORMAT
 
 
-@pytest.mark.parametrize("test_data", PACE_INPUT_FORMAT.items())
+@pytest.mark.parametrize("test_data", list(PACE_INPUT_FORMAT.items()))
 def test_conversion_to_PACE_format_works(test_data):
     req_id, expected = test_data
     req = create_test_request(req_id)

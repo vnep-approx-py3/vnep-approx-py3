@@ -1,9 +1,9 @@
 import pytest
 
-from alib import datamodel, solutions
+from alib3 import datamodel, solutions
 from commutativity_model_test_data import example_requests, create_request, filter_requests_by_tags
 from gurobi_mock import MockModel
-from vnep_approx import commutativity_model
+from vnep_approx3 import commutativity_model
 
 i, j, k = "ijk"
 ij = i, j
@@ -76,7 +76,7 @@ def test_extract_edge_mapping_reversed_edge(substrate, triangle_request):
     ku_index = frozenset([(k, u)])
     kv_index = frozenset([(k, v)])
 
-    ji_sub_lp = mc.edge_sub_lp[triangle_request][("j", "i")].values()[0]
+    ji_sub_lp = list(mc.edge_sub_lp[triangle_request][("j", "i")].values())[0]
     ji_sub_lp.var_node_flow_source[v].x = 0.5
     ji_sub_lp.var_edge_flow[wu].x = 0.5
     ji_sub_lp.var_edge_flow[vw].x = 0.5
@@ -304,8 +304,8 @@ def test_decomposition_full_request(request_id, substrate):
         vars = test_mapping["variables"]
         expected_mappings.add(
             (flow,
-             frozenset(test_mapping["expected"]["nodes"].items()),
-             frozenset((k, tuple(v)) for (k, v) in test_mapping["expected"]["edges"].items()))
+             frozenset(list(test_mapping["expected"]["nodes"].items())),
+             frozenset((k, tuple(v)) for (k, v) in list(test_mapping["expected"]["edges"].items())))
         )
         for var_type, req_key, comm_index, substrate_key in vars:
             var = var_type_lookup[var_type](req_key, comm_index, substrate_key)
@@ -315,37 +315,37 @@ def test_decomposition_full_request(request_id, substrate):
     frac_sol = mc.recover_fractional_solution_from_variables()
 
     obtained_mappings = set()
-    for mapping_list in frac_sol.request_mapping.values():
+    for mapping_list in list(frac_sol.request_mapping.values()):
         for mapping in mapping_list:
             obtained_mappings.add((
                 frac_sol.mapping_flows[mapping.name],
-                frozenset(mapping.mapping_nodes.items()),
-                frozenset((k, tuple(v)) for (k, v) in mapping.mapping_edges.items())
+                frozenset(list(mapping.mapping_nodes.items())),
+                frozenset((k, tuple(v)) for (k, v) in list(mapping.mapping_edges.items()))
             ))
 
     assert obtained_mappings == expected_mappings
     assert mc._used_flow_embedding_decision[req] == expected_embedding_flow
 
     expected_used_node_flow = {req: {}}
-    for i, u_comm_index_dict in mc.var_node_mapping[req].items():
+    for i, u_comm_index_dict in list(mc.var_node_mapping[req].items()):
         expected_used_node_flow[req][i] = {}
-        for u, comm_index_dict in u_comm_index_dict.items():
+        for u, comm_index_dict in list(u_comm_index_dict.items()):
             expected_used_node_flow[req][i][u] = {}
-            for comm_index, var in comm_index_dict.items():
+            for comm_index, var in list(comm_index_dict.items()):
                 expected_used_node_flow[req][i][u][comm_index] = var.x
     assert mc._used_flow_node_mapping == expected_used_node_flow
 
     for ij in mc.dag_requests[req].edges:
-        for comm_index, sub_lp in mc.edge_sub_lp[req][ij].iteritems():
+        for comm_index, sub_lp in mc.edge_sub_lp[req][ij].items():
             expected_used_source_flow = {
-                u: var.x for u, var in sub_lp.var_node_flow_source.iteritems()
+                u: var.x for u, var in sub_lp.var_node_flow_source.items()
             }
             assert sub_lp._used_flow_source == expected_used_source_flow
             expected_used_sink_flow = {
-                u: var.x for u, var in sub_lp.var_node_flow_sink.iteritems()
+                u: var.x for u, var in sub_lp.var_node_flow_sink.items()
             }
             assert sub_lp._used_flow_sink == expected_used_sink_flow
             expected_used_edge_flow = {
-                uv: var.x for uv, var in sub_lp.var_edge_flow.iteritems()
+                uv: var.x for uv, var in sub_lp.var_edge_flow.items()
             }
             assert sub_lp._used_flow == expected_used_edge_flow

@@ -8,7 +8,7 @@ import logging
 import datetime
 from time import sleep
 
-import alib.util as util
+import alib3.util as util
 
 
 @pytest.fixture
@@ -26,20 +26,20 @@ def import_gurobi_mock():
 _log_directory = None
 @pytest.fixture(scope="session", autouse=True)
 def check_and_create_log_diretory(request):
-    print("\n\nChecking whether directory {} exists...".format(util.ExperimentPathHandler.LOG_DIR))
+    print(("\n\nChecking whether directory {} exists...".format(util.ExperimentPathHandler.LOG_DIR)))
     if not os.path.exists(util.ExperimentPathHandler.LOG_DIR):
-        print("\tdid not exist, will create...".format(util.ExperimentPathHandler.LOG_DIR))
+        print(("\tdid not exist, will create...".format(util.ExperimentPathHandler.LOG_DIR)))
         os.mkdir(util.ExperimentPathHandler.LOG_DIR)
-        print("\tcreated.".format(util.ExperimentPathHandler.LOG_DIR))
+        print(("\tcreated.".format(util.ExperimentPathHandler.LOG_DIR)))
         _log_directory = util.ExperimentPathHandler.LOG_DIR
         #only if it was created, we remove it...
 
         def remove_log_directory():
             if _log_directory is not None:
                 import shutil
-                print("\n\nGoing to remove directory {}..".format(_log_directory))
+                print(("\n\nGoing to remove directory {}..".format(_log_directory)))
                 for logfile in glob.glob(_log_directory + "/*.log"):
-                    print("\tremoving file {}..".format(logfile))
+                    print(("\tremoving file {}..".format(logfile)))
                     os.remove(logfile)
                 print("\tremoving directoy.")
                 os.rmdir(_log_directory)

@@ -2,15 +2,15 @@ import random
 import time
 import numpy as np
 
-from alib import datamodel
+from alib3 import datamodel
 from test.treewidth_model.test_data.request_test_data import example_requests
-from vnep_approx.treewidth_model import ValidMappingRestrictionComputer
-from vnep_approx.treewidth_model import ShortestValidPathsComputer_NoLatencies as SVPC_given
-from vnep_approx.latency_files.lorenz import ShortestValidPathsComputerLORENZ as SVPC_Lorenz
-from vnep_approx.latency_files.goel import ShortestValidPathsComputer as SVPC_goel
-from vnep_approx.latency_files.SVPC_all import ShortestValidPathsComputer as SVPC_all
+from vnep_approx3.treewidth_model import ValidMappingRestrictionComputer
+from vnep_approx3.treewidth_model import ShortestValidPathsComputer_NoLatencies as SVPC_given
+from vnep_approx3.latency_files.lorenz import ShortestValidPathsComputerLORENZ as SVPC_Lorenz
+from vnep_approx3.latency_files.goel import ShortestValidPathsComputer as SVPC_goel
+from vnep_approx3.latency_files.SVPC_all import ShortestValidPathsComputer as SVPC_all
 
-from vnep_approx.latency_files.test_results import verify_correct_result
+from vnep_approx3.latency_files.test_results import verify_correct_result
 
 
 
@@ -32,14 +32,14 @@ def run_SVPC_comparison():
     substrate = create_large_substrate(number_nodes, edge_res_factor)
     request = create_large_request(0, substrate, "dragon 3")
 
-    edge_costs      = dict(zip(substrate.edges, np.random.normal(mean, variance, substrate.get_number_of_edges())))
-    edge_latencies  = dict(zip(substrate.edges, np.random.normal(mean, variance, substrate.get_number_of_edges())))
+    edge_costs      = dict(list(zip(substrate.edges, np.random.normal(mean, variance, substrate.get_number_of_edges()))))
+    edge_latencies  = dict(list(zip(substrate.edges, np.random.normal(mean, variance, substrate.get_number_of_edges()))))
 
-    for key, val in edge_costs.iteritems():
+    for key, val in edge_costs.items():
         if val < 0:
             edge_costs[key] = - val
 
-    for key, val in edge_latencies.iteritems():
+    for key, val in edge_latencies.items():
         if val < 0:
             edge_latencies[key] = - val
 
@@ -65,51 +65,51 @@ def run_SVPC_comparison():
     times = [list() for _ in range(len(candidates))]
 
 
-    print "setup substrate on ", substrate.get_number_of_nodes()\
-                                 , " nodes and ", substrate.get_number_of_edges(), " edges"
+    print("setup substrate on ", substrate.get_number_of_nodes()\
+                                 , " nodes and ", substrate.get_number_of_edges(), " edges")
 
     # ------------------------------------
 
     for i in range(num_reps):
-        print " - - - - - - - - - - - - - - - - -"
+        print(" - - - - - - - - - - - - - - - - -")
         for ix, cand in enumerate(candidates):
             start_time = time.time()
             cand.compute()
             time_needed = time.time() - start_time
             times[ix].append(time_needed)
-            print "time " + names[cand] + "\t\t ", time_needed
+            print("time " + names[cand] + "\t\t ", time_needed)
 
-    print "----------------------------------"
+    print("----------------------------------")
 
     averages = list()
     time_plain = 0
     for ix, cand in enumerate(candidates):
         avg = np.mean(times[ix])
         averages.append(avg)
-        print " avg time "+ names[cand] +":\t\t", avg
+        print(" avg time "+ names[cand] +":\t\t", avg)
         if cand == plain:
             time_plain = avg
         else:
-            print "\t\t" + ("limit overstepped" if cand.latency_limit_overstepped else "limit held")
+            print("\t\t" + ("limit overstepped" if cand.latency_limit_overstepped else "limit held"))
 
-    print " "
+    print(" ")
 
     if time_plain > 0:
         if plain in candidates and len(candidates) > 1:
             for ix, cand in enumerate(candidates):
                 if cand == plain:
                     continue
-                print "\t\t ->\t", averages[ix] / time_plain
-            print "\t\t ->\t1\n"
+                print("\t\t ->\t", averages[ix] / time_plain)
+            print("\t\t ->\t1\n")
 
     for cand in candidates:
         if cand == plain:
             continue
 
-        print "Testing " + names[cand] + " .."
+        print("Testing " + names[cand] + " ..")
         verify_correct_result(cand, verify_optimality=(number_nodes <= 15))
 
-    print "done"
+    print("done")
 
 
 
@@ -173,13 +173,13 @@ def check_edges_in_substrate(svpc, sub):
                 path = svpc.valid_sedge_paths[edgeset][start_node][target_node]
 
                 if not path <= sub.edges:
-                    print "ERROR!!"
+                    print("ERROR!!")
                     inv_edges.add(path)
 
     if inv_edges:
-        print "Invalid Paths:\n", inv_edges
+        print("Invalid Paths:\n", inv_edges)
     else:
-        print "all edges good!"
+        print("all edges good!")
 
 def check_if_all_paths_valid(svpcwl, sub):
 
@@ -209,19 +209,19 @@ def check_if_all_paths_valid(svpcwl, sub):
                 total_latencies += svpcwl.edge_latencies[sedge]
 
             if total_latencies > svpcwl.limit:
-                print "ERROR: latency limit overstepped: {} -> {} by {},  \tusing {}".format(num_source_node, svpcwl.snode_id_to_num_id[snode_target], total_latencies - svpcwl.limit, path)
+                print("ERROR: latency limit overstepped: {} -> {} by {},  \tusing {}".format(num_source_node, svpcwl.snode_id_to_num_id[snode_target], total_latencies - svpcwl.limit, path))
 
     for sedge in inv_edges:
-        print "ERROR: invalid edge: {}".format(sedge)
+        print("ERROR: invalid edge: {}".format(sedge))
 
-    print "valid path check done"
+    print("valid path check done")
 
 def check_approximation_guarantee(approximated_costs, actual_costs, epsilon):
 
     errors = []
     max_factor = -1
-    for edge_set_index, edge_set_dict in approximated_costs.items():
-        for (start_node, end_node), costs in edge_set_dict.items():
+    for edge_set_index, edge_set_dict in list(approximated_costs.items()):
+        for (start_node, end_node), costs in list(edge_set_dict.items()):
 
             act_costs = actual_costs[edge_set_index][(start_node, end_node)]
 

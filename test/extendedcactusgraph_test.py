@@ -1,7 +1,7 @@
 import pytest
 
-from alib import datamodel
-from vnep_approx.extendedcactusgraph import ExtendedCactusGraph, ExtendedCactusGraphError
+from alib3 import datamodel
+from vnep_approx3.extendedcactusgraph import ExtendedCactusGraph, ExtendedCactusGraphError
 
 
 class TestExtendedCactusGraph:
@@ -268,8 +268,8 @@ class TestExtendedCactusGraph:
         )
 
         eg = ExtendedCactusGraph(req, sub)
-        for u in eg.nodes: print u
-        for e in eg.edges: print e
+        for u in eg.nodes: print(u)
+        for e in eg.edges: print(e)
         assert should_not_exist not in eg.edges, "Extended graph contained edge corresponding to infeasible node mapping in path"
         assert should_exist in eg.edges, "Extended graph did not contain edge corresponding to feasible node mapping"
 
@@ -306,10 +306,10 @@ class TestExtendedCactusGraph:
             ExtendedCactusGraph._super_node_name(("n2", "target"), "w", "layer_cycle", branch_substrate_node="w")
         )
 
-        print should_not_exist
-        print should_exist
-        for u in eg.nodes: print u
-        for e in eg.edges: print e
+        print(should_not_exist)
+        print(should_exist)
+        for u in eg.nodes: print(u)
+        for e in eg.edges: print(e)
         assert should_exist in eg.edges, "Extended graph did not contain edge corresponding to feasible node mapping"
         assert should_not_exist not in eg.edges, "Extended graph contained edge corresponding to infeasible node mapping in cycle"
         should_not_exist = ExtendedCactusGraph._super_node_name(("n1", "n2"), "v", "layer_cycle", branch_substrate_node="x")
@@ -336,8 +336,8 @@ class TestExtendedCactusGraph:
 
         eg = ExtendedCactusGraph(req, sub)
 
-        from alib.util import get_graph_viz_string
-        print get_graph_viz_string(eg)
+        from alib3.util import get_graph_viz_string
+        print(get_graph_viz_string(eg))
         should_not_exist = [
             (
                 ExtendedCactusGraph._super_node_name(("n2", "n3"), "w", "layer_cycle", branch_substrate_node="w"),

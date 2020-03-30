@@ -1,12 +1,12 @@
 import pytest
-from vnep_approx import treewidth_model
+from vnep_approx3 import treewidth_model
 
 import numpy as np
 
-from alib import mip
-from alib import datamodel as dm
-from test_data.request_test_data import create_test_request, example_requests, example_requests_small
-from test_data.substrate_test_data import create_test_substrate_topology_zoo
+from alib3 import mip
+from alib3 import datamodel as dm
+from .test_data.request_test_data import create_test_request, example_requests, example_requests_small
+from .test_data.substrate_test_data import create_test_substrate_topology_zoo
 
 import random
 import time
@@ -100,7 +100,7 @@ def test_opt_dynvmp(request_id):
 
     # set substrate node and edge capacities high
     for snode in sub.nodes:
-        for type in sub.node[snode]['capacity'].keys():
+        for type in list(sub.node[snode]['capacity'].keys()):
             sub.node[snode]['capacity'][type] = 100
 
     for sedge in sub.edges:
@@ -116,21 +116,21 @@ def test_opt_dynvmp(request_id):
 
         selected_nodes = []
         while len(selected_nodes) == 0:
-            print "selected nodes are {}".format(selected_nodes)
+            print("selected nodes are {}".format(selected_nodes))
             selected_nodes = valid_reqnode_list[0:random.randint(10, len(valid_reqnode_list))]
         req.set_allowed_nodes(reqnode, selected_nodes)
-        print "Allowd nodes for {} are {}.".format(reqnode, req.get_allowed_nodes(reqnode))
+        print("Allowd nodes for {} are {}.".format(reqnode, req.get_allowed_nodes(reqnode)))
     for reqedge in req.edges:
         random.shuffle(sedge_list)
         req.set_allowed_edges(reqedge, sedge_list[0:random.randint(20, len(sedge_list))])
-        print "Allowd edges for {} are {}.".format(reqedge, req.get_allowed_edges(reqedge))
+        print("Allowd edges for {} are {}.".format(reqedge, req.get_allowed_edges(reqedge)))
 
     # random edge costs
     edge_costs = {sedge: max(1, 1000.0 * random.random()) for sedge in sub.edges}
     for sedge in sub.edges:
         sub.edge[sedge]['cost'] = 1  # edge_costs[sedge]
     for snode in sub.nodes:
-        for type in sub.node[snode]['cost'].keys():
+        for type in list(sub.node[snode]['cost'].keys()):
             sub.node[snode]['cost'][type] = 1
 
     scenario = dm.Scenario("test", sub, [req])
@@ -158,25 +158,25 @@ def test_opt_dynvmp(request_id):
         for index, cost in np.ndenumerate(costs):
             if index == 0:
                 assert cost == obj
-            print "{}-th best cost is: {} and index is {}".format(index, cost, mapping_indices[index])
+            print("{}-th best cost is: {} and index is {}".format(index, cost, mapping_indices[index]))
         corresponding_mappings = opt_dynvmp.recover_list_of_mappings(mapping_indices)
-        print "Number of obtained mappings: {}, mappings: {}".format(len(corresponding_mappings), corresponding_mappings)
+        print("Number of obtained mappings: {}, mappings: {}".format(len(corresponding_mappings), corresponding_mappings))
 
     result_mapping = opt_dynvmp.recover_mapping()
-    print "Returned mapping! Namely, the following: {}".format(result_mapping)
+    print("Returned mapping! Namely, the following: {}".format(result_mapping))
 
     # change costs
     snode_costs = opt_dynvmp.snode_costs
     sedge_costs = opt_dynvmp.sedge_costs
-    for snode in snode_costs.keys():
+    for snode in list(snode_costs.keys()):
         snode_costs[snode] *= 2
-    for sedge in sedge_costs.keys():
+    for sedge in list(sedge_costs.keys()):
         sedge_costs[sedge] *= 2
 
     opt_dynvmp.reinitialize(snode_costs, sedge_costs)
     opt_dynvmp.compute_solution()
     result_mapping = opt_dynvmp.recover_mapping()
-    print "Returned mapping! Namely, the following: {}".format(result_mapping)
+    print("Returned mapping! Namely, the following: {}".format(result_mapping))
 
 
 @pytest.mark.parametrize("request_id", example_requests)
@@ -187,7 +187,7 @@ def test_opt_dynvmp_and_classic_mcf_agree_for_unambiguous_scenario(
         request_id, random_seed, allowed_nodes_ratio, allowed_edges_ratio
 ):
     random.seed(random_seed)
-    print "allowed nodes: {} %, allowed edges: {} %".format(100 * allowed_nodes_ratio, 100 * allowed_edges_ratio)
+    print("allowed nodes: {} %, allowed edges: {} %".format(100 * allowed_nodes_ratio, 100 * allowed_edges_ratio))
     req = create_test_request(request_id, set_allowed_nodes=False)
     node_type = "test_type"
     sub = create_test_substrate_topology_zoo(node_types=[node_type])
@@ -268,7 +268,7 @@ def test_opt_dynvmp_and_classic_mcf_agree_for_unambiguous_scenario(
     initial_computation_time = times_dynvmp[0]
     other_computation_times = times_dynvmp[1:]
     average_of_others = sum(other_computation_times) / float(len(other_computation_times))
-    print("        Request graph size (|V|,|E|):  ({},{})\n"
+    print(("        Request graph size (|V|,|E|):  ({},{})\n"
           "             Width of the request is:  {}\n"
           "      Runtime of initial computation:  {:02.4f} s\n"
           "Runtime of later computations (avg.):  {:02.4f} s\n"
@@ -283,4 +283,4 @@ def test_opt_dynvmp_and_classic_mcf_agree_for_unambiguous_scenario(
                                                                            initial_computation_time / average_of_others,
                                                                            sum(times_dynvmp),
                                                                            sum(times_gurobi),
-                                                                           sum(times_gurobi)/sum(times_dynvmp)))
+                                                                           sum(times_gurobi)/sum(times_dynvmp))))

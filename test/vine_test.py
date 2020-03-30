@@ -3,9 +3,9 @@ import pytest
 import warnings
 
 import vine_test_data as vtd
-from vnep_approx import vine
+from vnep_approx3 import vine
 
-from alib import datamodel, solutions
+from alib3 import datamodel, solutions
 
 
 
@@ -28,7 +28,7 @@ def test_single_request_embeddings_shortest_path_method(lp_objective, test_case)
                                   rounding_procedure=vine.ViNERoundingProcedure.DETERMINISTIC)
     result = v.compute_integral_solution()
     solution = result.get_solution()
-    req, m = next(solution.request_mapping.iteritems())  # there should only be one...
+    req, m = next(iter(solution.request_mapping.items()))  # there should only be one...
 
     expected_mapping = test_data["expected_integer_solution"]
     if expected_mapping is None:
@@ -58,7 +58,7 @@ def test_single_request_embeddings_splittable_path_method(lp_objective, test_cas
                                   )
     result = v.compute_integral_solution()
     solution = result.get_solution()
-    req, m = next(solution.request_mapping.iteritems())  # there should only be one...
+    req, m = next(iter(solution.request_mapping.items()))  # there should only be one...
 
     expected_mapping = test_data["expected_fractional_solution"]
     if expected_mapping is None:
@@ -81,7 +81,7 @@ def test_single_request_rejected_embeddings(test_case):
 
     result = v.compute_integral_solution()
     solution = result.get_solution()
-    req, m = next(solution.request_mapping.iteritems())  # there should only be one...
+    req, m = next(iter(solution.request_mapping.items()))  # there should only be one...
 
     assert m is None
 

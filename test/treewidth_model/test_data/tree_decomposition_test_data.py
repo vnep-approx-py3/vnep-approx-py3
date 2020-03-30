@@ -2,7 +2,7 @@
 Some valid tree decompositions for example requests.
 
 """
-from vnep_approx import treewidth_model
+from vnep_approx3 import treewidth_model
 from . import request_test_data
 
 
@@ -10,7 +10,7 @@ def create_test_tree_decomposition(td_dict):
     req_id_no_space = td_dict.get("request_id", "unknown").replace(" ", "_")
     tree_decomp = treewidth_model.TreeDecomposition("{}_TD".format(req_id_no_space))
 
-    for node, bag in td_dict["bags"].items():
+    for node, bag in list(td_dict["bags"].items()):
         tree_decomp.add_node(node, node_bag=bag)
     for t1, t2 in td_dict["edges"]:
         tree_decomp.add_edge(t1, t2)

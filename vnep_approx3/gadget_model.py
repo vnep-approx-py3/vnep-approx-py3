@@ -29,7 +29,7 @@ import itertools
 
 from gurobipy import GRB, LinExpr
 
-from alib import datamodel, modelcreator, solutions
+from alib3 import datamodel, modelcreator, solutions
 from . import extendedcactusgraph, modelcreator_ecg_decomposition
 
 
@@ -166,7 +166,7 @@ class GadgetContainerRequest(object):
         # set it & pass through to gadgets
         self.substrate = substrate
         self.substrate_resources = substrate.substrate_resources
-        for g in self.gadgets.values():
+        for g in list(self.gadgets.values()):
             g.set_substrate(substrate)
 
     def add_gadget(self, gadget):
@@ -201,7 +201,7 @@ class GadgetContainerRequest(object):
         interface_nodes = {}  # node names to node parameters
         inner_nodes = set()  # node names
 
-        for gadget in self.gadgets.itervalues():
+        for gadget in self.gadgets.values():
             # check if the in- and out-nodes of gadget exists
             if gadget.in_node not in gadget.request.node:
                 raise GadgetError("in-node '{}' not in {}".format(gadget.in_node, gadget))
@@ -209,7 +209,7 @@ class GadgetContainerRequest(object):
                 if out_node not in gadget.request.node:
                     raise GadgetError("out-node '{}' not in {}".format(out_node, gadget))
 
-            for node, params in gadget.request.node.iteritems():
+            for node, params in gadget.request.node.items():
                 relevant_parameters = ["type", "allowed_nodes", "demand"]
                 if node == gadget.in_node or node in gadget.out_nodes:
                     # check if node parameters are the same for interface nodes
@@ -236,7 +236,7 @@ class GadgetContainerRequest(object):
         :raises GadgetError: if a check fails
         """
         all_out_nodes = set()
-        for gadget in self.gadgets.itervalues():
+        for gadget in self.gadgets.values():
             for out_node in gadget.out_nodes:
                 if out_node in all_out_nodes:
                     raise GadgetError("out-node '{}' is used by multiple gadgets".format(out_node))
@@ -253,7 +253,7 @@ class GadgetContainerRequest(object):
         :raises GadgetError: if there is not exactly one root gadget
         """
         out_nodes = set()
-        for gadget in self.gadgets.itervalues():
+        for gadget in self.gadgets.values():
             out_nodes.update(gadget.out_nodes)
 
         # find root gadgets
@@ -295,7 +295,7 @@ class GadgetContainerRequest(object):
         """
         if self.root_gadget is None:
             raise GadgetError("Root gadget is undefined!")
-        for gadget in self.gadgets.itervalues():
+        for gadget in self.gadgets.values():
             gadget.generate_variables(model)
 
     def generate_constraints(self, model):
@@ -308,7 +308,7 @@ class GadgetContainerRequest(object):
             raise GadgetError("Root gadget is undefined!")
         self.root_gadget.generate_flow_induction_at_root_constraint(model)
 
-        for gadget in self.gadgets.itervalues():
+        for gadget in self.gadgets.values():
             gadget.generate_constraints(model)
         self._generate_load_constraints(model)
 
@@ -322,10 +322,10 @@ class GadgetContainerRequest(object):
                        for sub_resource in self.substrate_resources}
 
         already_handled_request_nodes = set()
-        for gadget in self.gadgets.itervalues():
+        for gadget in self.gadgets.values():
             gadget.extend_load_constraints(constraints, already_handled_request_nodes)
 
-        for key, expr in constraints.iteritems():
+        for key, expr in constraints.items():
             expr = LinExpr(expr)
             if key in self.substrate.edges:
                 constr_name = modelcreator.construct_name(
@@ -409,7 +409,7 @@ class GadgetContainerRequest(object):
             inconsistent edge mappings
         """
         error_msg = ""
-        for ij, uv_list in mapping.mapping_edges.iteritems():
+        for ij, uv_list in mapping.mapping_edges.items():
             i, j = ij
             if not uv_list:
                 # this implies colocation of i and j
@@ -452,14 +452,14 @@ class GadgetContainerRequest(object):
         :return: the modified objective expression
         :rtype: gurobipy.LinExpr
         """
-        for gadget in self.gadgets.itervalues():
+        for gadget in self.gadgets.values():
             obj_expr = gadget.adapt_model_objective_according_to_local_profits(obj_expr)
         return obj_expr
 
     def get_gadget_tree_graph(self):
         result = datamodel.Graph("{}_gadget_tree".format(self.name))
 
-        for g in self.gadgets.values():
+        for g in list(self.gadgets.values()):
             result.add_node(g.name)
 
         gadget_queue = {self.root_gadget}
@@ -539,7 +539,7 @@ class AbstractGadget(object):
 
     def verify_mapping(self, mapping):
         """
-        Perform certain sanity checks usually performed by the :class:`alib.solutions.Mapping`
+        Perform certain sanity checks usually performed by the :class:`alib3.solutions.Mapping`
         class.
 
         :param solutions.Mapping mapping: the request mapping
@@ -570,8 +570,8 @@ class DecisionGadget(AbstractGadget):
                     continue
                 self.gurobi_vars["node_flow"][i][u] = self.container_request.add_node_flow_var(model, i, u)
         self.gurobi_vars["edge_flow"] = {}
-        for i, uv_edge_dict in self.ext_graph.layer_edges.iteritems():
-            for uv, edge in uv_edge_dict.iteritems():
+        for i, uv_edge_dict in self.ext_graph.layer_edges.items():
+            for uv, edge in uv_edge_dict.items():
                 variable_id = modelcreator.construct_name(
                     "edge_flow",
                     req_name=self.container_request.name,
@@ -585,8 +585,8 @@ class DecisionGadget(AbstractGadget):
                     vtype=GRB.BINARY,
                     name=variable_id
                 )
-        for ij, u_edge_dict in self.ext_graph.inter_layer_edges.iteritems():
-            for u, edge in u_edge_dict.iteritems():
+        for ij, u_edge_dict in self.ext_graph.inter_layer_edges.items():
+            for u, edge in u_edge_dict.items():
                 variable_id = modelcreator.construct_name(
                     "interlayer_edge_flow",
                     req_name=self.container_request.name,
@@ -600,8 +600,8 @@ class DecisionGadget(AbstractGadget):
                     vtype=GRB.BINARY,
                     name=variable_id
                 )
-        for i, u_edge_dict in self.ext_graph.sink_edges.iteritems():
-            for u, edge in u_edge_dict.iteritems():
+        for i, u_edge_dict in self.ext_graph.sink_edges.items():
+            for u, edge in u_edge_dict.items():
                 variable_id = modelcreator.construct_name(
                     "interlayer_sink_edge_flow",
                     req_name=self.container_request.name,
@@ -617,10 +617,10 @@ class DecisionGadget(AbstractGadget):
                 )
 
     def adapt_model_objective_according_to_local_profits(self, obj_expr):
-        for ij, u_edge_dict in self.ext_graph.inter_layer_edges.iteritems():
+        for ij, u_edge_dict in self.ext_graph.inter_layer_edges.items():
             if "edge_profit" in self.request.edge[ij]:
                 profit = self.request.edge[ij]["edge_profit"]
-                for ext_edge in u_edge_dict.values():
+                for ext_edge in list(u_edge_dict.values()):
                     obj_expr.addTerms(profit, self.gurobi_vars["edge_flow"][ext_edge])
         return obj_expr
 
@@ -656,10 +656,10 @@ class DecisionGadget(AbstractGadget):
 
     def extend_load_constraints(self, constraint_dict, nodes_handled_by_other_gadgets):
         handled_nodes = set()
-        for ij, u_edge_dict in self.ext_graph.inter_layer_edges.iteritems():
+        for ij, u_edge_dict in self.ext_graph.inter_layer_edges.items():
             i, j = ij
             i_type = self.request.get_type(i)
-            for u, edge in u_edge_dict.iteritems():
+            for u, edge in u_edge_dict.items():
                 u_i_ext, v_j_ext = edge
                 # the source nodes may have been handled by another gadget
                 if u_i_ext in self.ext_graph.source_node_set:
@@ -667,15 +667,15 @@ class DecisionGadget(AbstractGadget):
                         continue
                     handled_nodes.add(i)
                 constraint_dict[(i_type, u)].append((1.0, self.gurobi_vars["edge_flow"][edge]))
-        for i, u_edge_dict in self.ext_graph.sink_edges.iteritems():
+        for i, u_edge_dict in self.ext_graph.sink_edges.items():
             i_type = self.request.get_type(i)
             if i in nodes_handled_by_other_gadgets:
                 continue
             handled_nodes.add(i)
-            for u, edge in u_edge_dict.iteritems():
+            for u, edge in u_edge_dict.items():
                 constraint_dict[(i_type, u)].append((1.0, self.gurobi_vars["edge_flow"][edge]))
-        for i, uv_edge_dict in self.ext_graph.layer_edges.iteritems():
-            for uv, edge in uv_edge_dict.iteritems():
+        for i, uv_edge_dict in self.ext_graph.layer_edges.items():
+            for uv, edge in uv_edge_dict.items():
                 constraint_dict[uv].append((1.0, self.gurobi_vars["edge_flow"][edge]))
         nodes_handled_by_other_gadgets.update(handled_nodes)
 
@@ -696,7 +696,7 @@ class DecisionGadget(AbstractGadget):
         # collect the possible exits from the extended graph:
         extgraph_exits = set()
         for i in self.out_nodes:
-            extgraph_exits.update(self.ext_graph.sink_nodes[i].values())
+            extgraph_exits.update(list(self.ext_graph.sink_nodes[i].values()))
         next_ext_node = u_in_node_ext
         i_previous = None
         exit_node = None
@@ -830,7 +830,7 @@ class DecisionGadget(AbstractGadget):
                 self._used_flow[i] = {u: 0.0}
             if u not in self._used_flow[i]:
                 raise DecisionModelError("Mapped {} onto multiple substrate nodes: {}, {}".format(
-                    i, self._node_vars_used_in_most_recent_mapping[i].keys(), u
+                    i, list(self._node_vars_used_in_most_recent_mapping[i].keys()), u
                 ))
             self._used_flow[i][u] += used_flow
 
@@ -994,10 +994,10 @@ class CactusGadget(AbstractGadget):
                     continue
                 if u not in self.gurobi_vars["node_flow"][i]:
                     self.gurobi_vars["node_flow"][i][u] = self.container_request.add_node_flow_var(model, i, u)
-        for i, ecg_node_dict in self.ext_graph.sink_nodes.iteritems():
+        for i, ecg_node_dict in self.ext_graph.sink_nodes.items():
             if i not in self.gurobi_vars["node_flow"]:
                 self.gurobi_vars["node_flow"][i] = {}
-            for u, ecg_node in ecg_node_dict.iteritems():
+            for u, ecg_node in ecg_node_dict.items():
                 if u not in self.gurobi_vars["node_flow"][i]:
                     self.gurobi_vars["node_flow"][i][u] = self.container_request.add_node_flow_var(model, i, u)
 
@@ -1044,7 +1044,7 @@ class CactusGadget(AbstractGadget):
 
     def generate_flow_induction_at_root_constraint(self, model):
         root = self.ext_graph.root
-        root_source_nodes = self.ext_graph.source_nodes[root].keys()  # this list contains all source nodes associated with the request root
+        root_source_nodes = list(self.ext_graph.source_nodes[root].keys())  # this list contains all source nodes associated with the request root
 
         expr = LinExpr([(-1.0, self.container_request.var_embedding_decision)] +
                        [(1.0, self.gurobi_vars["node_flow"][root][u]) for u in root_source_nodes])
@@ -1348,7 +1348,7 @@ class CactusGadget(AbstractGadget):
                     break
         else:
             # choose arbitrarily:
-            for gadget_mapping, remaining_flow in self._remaining_flow_on_mapping.iteritems():
+            for gadget_mapping, remaining_flow in self._remaining_flow_on_mapping.items():
                 if remaining_flow > self.rounding_threshold:
                     chosen_gadget_mapping = gadget_mapping
                     break
@@ -1356,7 +1356,7 @@ class CactusGadget(AbstractGadget):
             raise DecisionModelError("No remaining consistent mapping with non-zero flow!")
         self._most_recent_mapping = chosen_gadget_mapping
 
-        for i, u in chosen_gadget_mapping.mapping_nodes.iteritems():
+        for i, u in chosen_gadget_mapping.mapping_nodes.items():
             nodes_handled_by_other_gadgets.add(i)
             if i in mapping.mapping_nodes:
                 if u != mapping.mapping_nodes[i]:
@@ -1364,12 +1364,12 @@ class CactusGadget(AbstractGadget):
             else:
                 mapping.mapping_nodes[i] = u  # direct assignment is necessary to avoid the checks in the map_node function (e.g. our "request" has no nodes attribute)
 
-        for ij, uv_list in chosen_gadget_mapping.mapping_edges.iteritems():
+        for ij, uv_list in chosen_gadget_mapping.mapping_edges.items():
             if ij in mapping.mapping_edges:
                 raise DecisionModelError("Sanity check! No edge overlap between gadgets!")
             mapping.mapping_edges[ij] = uv_list
 
-        for res, x in self._mapping_loads[chosen_gadget_mapping].iteritems():
+        for res, x in self._mapping_loads[chosen_gadget_mapping].items():
             load[res] += x
 
         # handle potential overlap with other gadgets:
@@ -1424,11 +1424,11 @@ class CactusGadget(AbstractGadget):
                 for u in self.ext_graph.source_nodes[self.ext_graph.root]
             ),
             node={
-                i: {u: var.x for (u, var) in u_var_dict.iteritems() if var.x != 0.0}
-                for (i, u_var_dict) in node_flow.iteritems()
+                i: {u: var.x for (u, var) in u_var_dict.items() if var.x != 0.0}
+                for (i, u_var_dict) in node_flow.items()
             },
             edge={
-                ext_edge: var.x for (ext_edge, var) in edge_flow.iteritems() if var.x != 0.0
+                ext_edge: var.x for (ext_edge, var) in edge_flow.items() if var.x != 0.0
             }
         )
         return result

@@ -19,9 +19,9 @@ def verify_correct_result(svpc, verify_optimality=False):
 
     try:
 
-        for edgeset_index, source_node_dict in svpc.valid_sedge_paths.iteritems():
-            for start_snode, target_dict in source_node_dict.iteritems():
-                for target_snode, path in target_dict.iteritems():
+        for edgeset_index, source_node_dict in svpc.valid_sedge_paths.items():
+            for start_snode, target_dict in source_node_dict.items():
+                for target_snode, path in target_dict.items():
                     if path is None:
                         errors.append("Path is None when shouldn't be!\n  from {} to {}, edgeset {}"
                                       .format(start_snode, target_snode, edgeset_index))
@@ -116,14 +116,14 @@ def verify_correct_result(svpc, verify_optimality=False):
                                           .format(start_snode, current_snode, edgeset_index))
 
             if not errors:
-                print "Test finished, no errors!"
+                print("Test finished, no errors!")
             else:
-                print "Test done, {} Error{} been found:\n".format(len(errors), "s have" if len(errors) > 1 else " has")
+                print("Test done, {} Error{} been found:\n".format(len(errors), "s have" if len(errors) > 1 else " has"))
                 for e in errors[:10]:
-                    print e
+                    print(e)
 
     except Exception as e:
-        print "An Exception occurred during testing. The structure may be wrong.\n\t", e
+        print("An Exception occurred during testing. The structure may be wrong.\n\t", e)
         traceback.print_exc()
 
 
@@ -177,7 +177,7 @@ def _verify_optimality(svpc, calculated_path_costs, num_source_node, num_target_
             # path is feasible
 
             if total_costs * (1 + svpc.epsilon) < calculated_path_costs:
-                print "A cheaper path has been found"
+                print("A cheaper path has been found")
 
 
 

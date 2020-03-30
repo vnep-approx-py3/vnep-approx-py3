@@ -1,7 +1,7 @@
 __author__ = 'Tom Koch (tkoch@inet.tu-berlin.de)'
 
-from alib import datamodel
-from vnep_approx.deferred import extendedgraph
+from alib3 import datamodel
+from vnep_approx3.deferred import extendedgraph
 
 
 def test_extendedgraph_generation():
@@ -28,4 +28,4 @@ def test_extendedgraph_generation():
     ext_graph = extendedgraph.ExtendedGraph(request,
                                             substrate)
     assert len(ext_graph.edges) == 17
-    print ext_graph
+    print(ext_graph)

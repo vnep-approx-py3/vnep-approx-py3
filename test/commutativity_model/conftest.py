@@ -1,6 +1,6 @@
 import pytest
 
-from alib import datamodel
+from alib3 import datamodel
 
 i, j, k = "ijk"
 ij = i, j

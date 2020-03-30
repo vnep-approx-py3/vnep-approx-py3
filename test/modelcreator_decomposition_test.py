@@ -1,7 +1,7 @@
 __author__ = 'Tom Koch (tkoch@inet.tu-berlin.de)'
 
-from alib import datamodel, test_utils
-from vnep_approx.deferred import modelcreator_decomposition as mc
+from alib3 import datamodel, test_utils
+from vnep_approx3.deferred import modelcreator_decomposition as mc
 
 
 class TestModelCreator:
@@ -23,12 +23,12 @@ class TestModelCreator:
         modelcreator.init_model_creator()
         solution = modelcreator.compute_fractional_solution()
         assert self.request in solution.request_mapping
-        print "profile:  time pre = {}, optimization = {} , post = {}".format(
+        print("profile:  time pre = {}, optimization = {} , post = {}".format(
             modelcreator.time_preprocess, modelcreator.time_optimization,
-            modelcreator.time_postprocessing)
+            modelcreator.time_postprocessing))
         if solution:
             if solution.validate_solution():
-                print solution
+                print(solution)
 
     def test_minimize_cost(self):
         modelcreator = mc.ModelCreatorDecomp(self.scenario)
@@ -36,7 +36,7 @@ class TestModelCreator:
         solution = modelcreator.compute_integral_solution()
         if solution:
             if solution.validate_solution():
-                print solution
+                print(solution)
 
     def test_max_profit(self):
         self.request.profit = 5
@@ -46,7 +46,7 @@ class TestModelCreator:
         solution = modelcreator.compute_integral_solution()
         if solution:
             if solution.validate_solution():
-                print solution
+                print(solution)
 
     def test_linear_chain(self):
         modelcreator = mc.ModelCreatorDecomp(self.scenario)

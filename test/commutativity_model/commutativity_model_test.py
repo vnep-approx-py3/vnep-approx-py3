@@ -3,9 +3,9 @@ from collections import namedtuple
 import pytest
 from gurobipy import GRB
 
-from alib import datamodel, solutions
+from alib3 import datamodel, solutions
 from commutativity_model_test_data import example_requests, create_request, filter_requests_by_tags
-from vnep_approx import commutativity_model
+from vnep_approx3 import commutativity_model
 
 pytestmark = pytest.mark.usefixtures("mock_gurobi")
 
@@ -103,7 +103,7 @@ def test_initialize_dag_request_error_with_multiple_components():
 
     with pytest.raises(commutativity_model.CommutativityModelError) as e:
         commutativity_model.CommutativityModelCreator._initialize_dag_request(req)
-    assert str(e.value).startswith("Request graph may have multiple components: Nodes set(['k', 'l']) were not visited by bfs.")
+        assert str(e.value).startswith("Request graph may have multiple components: Nodes set(['k', 'l']) were not visited by bfs.")
 
 
 def test_get_valid_substrate_nodes(substrate):
@@ -112,7 +112,7 @@ def test_get_valid_substrate_nodes(substrate):
     req.add_node(j, 1.0, "t1", [v, w])
     req.add_node(k, 1.0, "t1", [u, w])
 
-    _get_valid_substrate_nodes = commutativity_model.CommutativityModelCreator._get_valid_substrate_nodes.__func__
+    _get_valid_substrate_nodes = commutativity_model.CommutativityModelCreator._get_valid_substrate_nodes
 
     class MockModelCreator(object):
         pass
@@ -276,36 +276,36 @@ def test_recover_fractional_solution_from_variables(substrate, triangle_request,
     expected_mappings_as_tuples = {
         mapping_nt(
             flow_1,
-            frozenset({i: u, l: w, j: v, k: u}.items()),
+            frozenset(list({i: u, l: w, j: v, k: u}.items())),
             frozenset([
                 edge_mapping_nt(li, (wu,)),
                 edge_mapping_nt(ij, (uv,)),
                 edge_mapping_nt(jk, (vw, wu)),
                 edge_mapping_nt(ik, ())
             ]),
-            frozenset(load_1.items())
+            frozenset(list(load_1.items()))
         ),
         mapping_nt(
             flow_2,
-            frozenset({i: u, l: w, j: v, k: u}.items()),
+            frozenset(list({i: u, l: w, j: v, k: u}.items())),
             frozenset([
                 edge_mapping_nt(li, (wu,)),
                 edge_mapping_nt(ij, (uw, wv)),
                 edge_mapping_nt(jk, (vw, wu)),
                 edge_mapping_nt(ik, ())
             ]),
-            frozenset(load_2.items())
+            frozenset(list(load_2.items()))
         ),
         mapping_nt(
             flow_3,
-            frozenset({i: u, l: w, j: v, k: v}.items()),
+            frozenset(list({i: u, l: w, j: v, k: v}.items())),
             frozenset([
                 edge_mapping_nt(li, (wu,)),
                 edge_mapping_nt(ij, (uw, wv)),
                 edge_mapping_nt(jk, ()),
                 edge_mapping_nt(ik, (uv,))
             ]),
-            frozenset(load_3.items())
+            frozenset(list(load_3.items()))
         )
     }
 
@@ -313,10 +313,10 @@ def test_recover_fractional_solution_from_variables(substrate, triangle_request,
     obtained_mappings_as_tuples = {
         mapping_nt(
             obtained_solution.mapping_flows[m.name],
-            frozenset(m.mapping_nodes.items()),
+            frozenset(list(m.mapping_nodes.items())),
             frozenset(edge_mapping_nt(k_, tuple(v_))
-                      for (k_, v_) in m.mapping_edges.items()),
-            frozenset(obtained_solution.mapping_loads[m.name].items()),
+                      for (k_, v_) in list(m.mapping_edges.items())),
+            frozenset(list(obtained_solution.mapping_loads[m.name].items())),
         )
         for m in obtained_solution.request_mapping[triangle_request]
     }
@@ -391,7 +391,7 @@ def test_reduce_flow_in_modelcreator(substrate, triangle_request, import_gurobi_
     assert mc._used_flow_node_mapping[triangle_request][i][u][ku_index] == 0.25
     assert mc._used_flow_node_mapping[triangle_request][j][v][ku_index] == 0.25
     assert mc._used_flow_node_mapping[triangle_request][k][u][frozenset()] == 0.25
-    for ij_, uv_list in mapping.mapping_edges.items():
+    for ij_, uv_list in list(mapping.mapping_edges.items()):
         i_, j_ = ij_
         sub_lp = mc.edge_sub_lp[triangle_request][ij_][ku_index]
         assert sub_lp._used_flow_source[mapping.mapping_nodes[i_]] == 0.25
@@ -423,12 +423,12 @@ def test_reduce_flow_in_modelcreator_with_reversed_edges(substrate, triangle_req
     cycle_end = [i_ for i_ in triangle_request.nodes if len(dag_request.get_in_neighbors(i_)) == 2][0]
     comm_index = frozenset([(cycle_end, mapping.mapping_nodes[cycle_end])])
 
-    for i_, u_ in mapping.mapping_nodes.items():
+    for i_, u_ in list(mapping.mapping_nodes.items()):
         if i_ == cycle_end:
             assert mc._used_flow_node_mapping[triangle_request][i_][u_][frozenset()] == 0.25
         else:
             assert mc._used_flow_node_mapping[triangle_request][i_][u_][comm_index] == 0.25
-    for ij_, uv_list in mapping.mapping_edges.items():
+    for ij_, uv_list in list(mapping.mapping_edges.items()):
         # We only need ij_ in the orientation of the BFS request
         if ij_ not in dag_request.edges:
             ij_ = ij_[1], ij_[0]

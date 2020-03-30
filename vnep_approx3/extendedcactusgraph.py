@@ -24,7 +24,7 @@
 from collections import deque, namedtuple
 from random import Random
 
-from alib import datamodel, util
+from alib3 import datamodel, util
 
 random = Random("extended_cactus_graph")
 
@@ -324,7 +324,7 @@ class ExtendedCactusGraph(datamodel.Graph):
                                         cost=original_edge_properties["cost"],
                                         bidirected=False)
             # copy any additional entries of the substrate's edge dict:
-            for key, value in self._original_substrate.edge[(tail, head)].iteritems():
+            for key, value in self._original_substrate.edge[(tail, head)].items():
                 if key not in reversed_substrate.edge[(head, tail)]:
                     reversed_substrate.edge[(head, tail)][key] = value
         return reversed_substrate
@@ -386,7 +386,7 @@ class ExtendedCactusGraph(datamodel.Graph):
                                              extended_path={},
                                              extended_edges=set(),
                                              extended_nodes=set())
-                    connections_from_previous_layer = {k: v for k, v in cycle_source_nodes.iteritems()}
+                    connections_from_previous_layer = {k: v for k, v in cycle_source_nodes.items()}
                     for edge in branch:
                         connections_from_previous_layer = self._make_substrate_copy_for_layer(edge,
                                                                                               connections_from_previous_layer,
@@ -445,7 +445,7 @@ class ExtendedCactusGraph(datamodel.Graph):
         if allowed_edges is not None:
             valid_substrate_edges = valid_substrate_edges.intersection(allowed_edges)
 
-        for u, previous_layer_u in connections_from_previous_layer.iteritems():  # add connections from the previous layer!
+        for u, previous_layer_u in connections_from_previous_layer.items():  # add connections from the previous layer!
             u_layer = self._add_and_get_layer_node(ij, u, cycle_target_substrate_node=cycle_target_node)
             self.add_edge(previous_layer_u, u_layer, bidirected=False, request_node=i, substrate_node=u)
             extended_path.extended_nodes.add(u_layer)
@@ -539,26 +539,26 @@ class ExtendedCactusGraph(datamodel.Graph):
         self._reverse_lookup_extended_nodes = {}
 
         for i in self.source_nodes:
-            for u, u_i in self.source_nodes[i].iteritems():
+            for u, u_i in self.source_nodes[i].items():
                 if u_i in self._reverse_lookup_extended_nodes:
                     raise ExtendedCactusGraphError("Sanity Check!")
                 self._reverse_lookup_extended_nodes[u_i] = (i, u)
 
         for i in self.sink_nodes:
-            for u, u_i in self.sink_nodes[i].iteritems():
+            for u, u_i in self.sink_nodes[i].items():
                 if u_i in self._reverse_lookup_extended_nodes:
                     raise ExtendedCactusGraphError("Sanity Check!")
                 self._reverse_lookup_extended_nodes[u_i] = (i, u)
 
         for ij in self.path_layer_nodes:
-            for u, u_ij in self.path_layer_nodes[ij].iteritems():
+            for u, u_ij in self.path_layer_nodes[ij].items():
                 if u_ij in self._reverse_lookup_extended_nodes:
                     raise ExtendedCactusGraphError("Sanity Check!")
                 self._reverse_lookup_extended_nodes[u_ij] = (ij, u)
 
         for ij in self.cycle_layer_nodes:
             for u in self.cycle_layer_nodes[ij]:
-                for w, u_ij_w in self.cycle_layer_nodes[ij][u].iteritems():
+                for w, u_ij_w in self.cycle_layer_nodes[ij][u].items():
                     if u_ij_w in self._reverse_lookup_extended_nodes:
                         raise ExtendedCactusGraphError("Sanity Check!")
                     self._reverse_lookup_extended_nodes[u_ij_w] = (ij, u, w)

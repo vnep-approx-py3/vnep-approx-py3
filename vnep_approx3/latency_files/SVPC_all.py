@@ -29,7 +29,7 @@ class ShortestValidPathsComputer_NoLatencies(object):
         self._compute_valid_edge_mapping_costs()
 
     def recompute_with_new_costs(self, new_edge_costs):
-        for sedge, cost in new_edge_costs.iteritems():
+        for sedge, cost in new_edge_costs.items():
             self.edge_costs[sedge] = abs(cost)
 
         self.compute()
@@ -98,7 +98,7 @@ class ShortestValidPathsComputer_NoLatencies(object):
 
         request_edge_to_edge_set_id = self.valid_mapping_restriction_computer.get_reqedge_to_edgeset_id_mapping()
 
-        for request_edge, edge_set_id_to_edge_set in request_edge_to_edge_set_id.iteritems():
+        for request_edge, edge_set_id_to_edge_set in request_edge_to_edge_set_id.items():
             self.valid_sedge_costs[request_edge] = self.valid_sedge_costs[edge_set_id_to_edge_set]
             self.valid_sedge_pred[request_edge] = self.valid_sedge_pred[edge_set_id_to_edge_set]
 
@@ -190,13 +190,13 @@ class ShortestValidPathsComputer(object):
             self.valid_sedge_paths[edgesetindex] = {}
 
         if self.number_of_valid_edge_sets == 0:
-            print "ERROR: no valid edges"
+            print("ERROR: no valid edges")
             return
 
         self._compute_all_pairs()
 
     def recompute_with_new_costs(self, new_edge_costs):
-        for sedge, cost in new_edge_costs.iteritems():
+        for sedge, cost in new_edge_costs.items():
             self.edge_costs[sedge] = abs(cost)
 
         self.compute()
@@ -262,7 +262,7 @@ class ShortestValidPathsComputer_Flex(ShortestValidPathsComputer):
 
         self.preds = np.full((self.number_of_nodes, 32 + 1), -1, dtype=np.int32)
         self.distances = np.full((self.number_of_nodes, 32 + 1), np.inf, dtype=np.float64)
-        self.tau_modified_latencies = dict(zip(self.substrate.edges, [0] * len(self.substrate.edges)))
+        self.tau_modified_latencies = dict(list(zip(self.substrate.edges, [0] * len(self.substrate.edges))))
 
     def _handle_zero_delay_links(self, num_source_node, t):
         queue = [num_source_node]
@@ -330,7 +330,7 @@ class ShortestValidPathsComputer_Flex(ShortestValidPathsComputer):
 
         while not approx_holds:
 
-            for key, value in self.edge_latencies.iteritems():
+            for key, value in self.edge_latencies.items():
                 val = int((value * tau) / self.limit)
                 self.tau_modified_latencies[key] = val
 
@@ -411,7 +411,7 @@ class ShortestValidPathsComputer_Strict(ShortestValidPathsComputer):
     def _SPPP(self, lower, upper, eps, num_source_node, num_target_node):
         S = float(lower * eps) / (self.num_feasible_nodes + 1)
 
-        rescaled_costs = dict(zip(self.current_valid_edge_set, map(lambda x: int(float(self.edge_costs[x]) / S) + 1, self.current_valid_edge_set)))
+        rescaled_costs = dict(list(zip(self.current_valid_edge_set, [int(float(self.edge_costs[x]) / S) + 1 for x in self.current_valid_edge_set])))
 
         U_tilde = int(upper / S) + self.num_feasible_nodes + 1
 

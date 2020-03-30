@@ -24,7 +24,7 @@
 import math
 import itertools
 import os
-import subprocess32 as subprocess
+import subprocess
 from collections import deque
 import numpy as np
 import random
@@ -36,14 +36,14 @@ from collections import namedtuple
 import time
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
 
 import gurobipy
 from gurobipy import GRB, LinExpr
-from alib import datamodel, modelcreator, solutions, util
+from alib3 import datamodel, modelcreator, solutions, util
 
 from . import randomized_rounding_triumvirate as rrt
 
@@ -86,7 +86,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
         del self.node_bag_dict[node]
 
 
-        for req_node in self.complete_request_node_to_tree_node_map.keys():
+        for req_node in list(self.complete_request_node_to_tree_node_map.keys()):
             if node in self.complete_request_node_to_tree_node_map[req_node]:
                 self.complete_request_node_to_tree_node_map[req_node].remove(node)
             if self.representative_map[req_node] == node:
@@ -115,7 +115,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
 
     @property
     def width(self):
-        return max(len(bag) for bag in self.node_bag_dict.values()) - 1
+        return max(len(bag) for bag in list(self.node_bag_dict.values())) - 1
 
     def get_bag_intersection(self, t1, t2):
         return self.node_bag_dict[t1] & self.node_bag_dict[t2]
@@ -126,13 +126,13 @@ class TreeDecomposition(datamodel.UndirectedGraph):
         return self.representative_map[req_node]
 
     def get_any_covering_td_node(self, *args):
-        covering_nodes = set(self.node_bag_dict.iterkeys())
+        covering_nodes = set(self.node_bag_dict.keys())
         for i in args:
             if i not in self.representative_map:
                 raise ValueError("Cannot find representative for unknown node {}!".format(i))
             covering_nodes &= {t for t in covering_nodes if i in self.node_bag_dict[t]}
             if not covering_nodes:
-                print "Nodes {} have no covering node!".format(", ".join(str(i) for i in args))
+                print("Nodes {} have no covering node!".format(", ".join(str(i) for i in args)))
                 return None
         return next(iter(covering_nodes))
 
@@ -173,7 +173,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
         for (i, j) in req.edges:
             # Check that there is some overlap in the sets of representative nodes:
             found_covering_bag = False
-            for node_bag in self.node_bag_dict.values():
+            for node_bag in list(self.node_bag_dict.values()):
                 if i in node_bag and j in node_bag:
                     found_covering_bag = True
                     break
@@ -184,7 +184,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
     def _verify_intersection_property(self):
         # Check that subtrees induced by each request node are connected
         for req_node in self.representative_map:
-            subtree_nodes = {t for (t, bag) in self.node_bag_dict.items() if req_node in bag}
+            subtree_nodes = {t for (t, bag) in list(self.node_bag_dict.items()) if req_node in bag}
             start_node = self.get_representative(req_node)
             visited = set()
             q = {start_node}
@@ -279,7 +279,7 @@ class SmallSemiNiceTDArb(TreeDecomposition):
 
     #essentially just make a copy
     def _initialize_from_original_td(self):
-        for node, node_bag in self.original_td.node_bag_dict.iteritems():
+        for node, node_bag in self.original_td.node_bag_dict.items():
             self.add_node(node, node_bag)
         for edge in self.original_td.edges:
             edge_as_list = list(edge)
@@ -525,7 +525,7 @@ class ShortestValidPathsComputer_NoLatencies(object):
         self._compute_valid_edge_mapping_costs()
 
     def recompute_with_new_costs(self, new_edge_costs):
-        for sedge, cost in new_edge_costs.iteritems():
+        for sedge, cost in new_edge_costs.items():
             self.edge_costs[sedge] = abs(cost)
 
         self.compute()
@@ -594,7 +594,7 @@ class ShortestValidPathsComputer_NoLatencies(object):
 
         request_edge_to_edge_set_id = self.valid_mapping_restriction_computer.get_reqedge_to_edgeset_id_mapping()
 
-        for request_edge, edge_set_id_to_edge_set in request_edge_to_edge_set_id.iteritems():
+        for request_edge, edge_set_id_to_edge_set in request_edge_to_edge_set_id.items():
             self.valid_sedge_costs[request_edge] = self.valid_sedge_costs[edge_set_id_to_edge_set]
             self.valid_sedge_pred[request_edge] = self.valid_sedge_pred[edge_set_id_to_edge_set]
 
@@ -691,14 +691,14 @@ class ShortestValidPathsComputer(object):
             self.valid_sedge_paths[edgesetindex] = {}
 
         if self.number_of_valid_edge_sets == 0:
-            print "ERROR: no valid edges"
+            print("ERROR: no valid edges")
             return
 
         self._compute_all_pairs()
 
     def recompute_with_new_costs(self, new_edge_costs):
         #TODO: here a new copy logic was introduced,
-        for sedge, cost in new_edge_costs.iteritems():
+        for sedge, cost in new_edge_costs.items():
             self.edge_costs[sedge] = abs(cost)  #TODO: abs seems absolutely unncessary
 
         self.compute()
@@ -764,7 +764,7 @@ class ShortestValidPathsComputer_Flex(ShortestValidPathsComputer):
 
         self.preds = np.full((self.number_of_nodes, 32 + 1), -1, dtype=np.int32)
         self.distances = np.full((self.number_of_nodes, 32 + 1), np.inf, dtype=np.float64)
-        self.tau_modified_latencies = dict(zip(self.substrate.edges, [0] * len(self.substrate.edges)))
+        self.tau_modified_latencies = dict(list(zip(self.substrate.edges, [0] * len(self.substrate.edges))))
 
     def _handle_zero_delay_links(self, num_source_node, t):
         queue = [num_source_node]
@@ -832,7 +832,7 @@ class ShortestValidPathsComputer_Flex(ShortestValidPathsComputer):
 
         while not approx_holds:
 
-            for key, value in self.edge_latencies.iteritems():
+            for key, value in self.edge_latencies.items():
                 val = int((value * tau) / self.limit)
                 self.tau_modified_latencies[key] = val
 
@@ -913,7 +913,7 @@ class ShortestValidPathsComputer_Strict(ShortestValidPathsComputer):
     def _SPPP(self, lower, upper, eps, num_source_node, num_target_node):
         S = float(lower * eps) / (self.num_feasible_nodes + 1)
 
-        rescaled_costs = dict(zip(self.current_valid_edge_set, map(lambda x: int(float(self.edge_costs[x]) / S) + 1, self.current_valid_edge_set)))
+        rescaled_costs = dict(list(zip(self.current_valid_edge_set, [int(float(self.edge_costs[x]) / S) + 1 for x in self.current_valid_edge_set])))
 
         U_tilde = int(upper / S) + self.num_feasible_nodes + 1
 
@@ -1192,9 +1192,9 @@ class LatencyConstrainedShortestPathsMIPComputer(modelcreator.AbstractModelCreat
 
         self.edge_set_id_to_edge_set = self.valid_mapping_restriction_computer.get_edge_set_mapping()
         self.number_of_valid_edge_sets = self.valid_mapping_restriction_computer.get_number_of_different_edge_sets()
-        self.valid_sedge_costs = {edge_set_id: {} for edge_set_id in xrange(self.number_of_valid_edge_sets)}
-        self.valid_sedge_latencies = {edge_set_id: {} for edge_set_id in xrange(self.number_of_valid_edge_sets)}
-        self.valid_sedge_paths = {edge_set_id: {} for edge_set_id in xrange(self.number_of_valid_edge_sets)}
+        self.valid_sedge_costs = {edge_set_id: {} for edge_set_id in range(self.number_of_valid_edge_sets)}
+        self.valid_sedge_latencies = {edge_set_id: {} for edge_set_id in range(self.number_of_valid_edge_sets)}
+        self.valid_sedge_paths = {edge_set_id: {} for edge_set_id in range(self.number_of_valid_edge_sets)}
 
         self.var_latency_bound = None
         self.var_y = {}
@@ -1299,7 +1299,7 @@ class LatencyConstrainedShortestPathsMIPComputer(modelcreator.AbstractModelCreat
     def compute_all_pairs_shortest_paths(self):
         self.model._epsilon = self.epsilon
         self.model._logger = self.logger
-        for edge_set_index in xrange(self.number_of_valid_edge_sets):
+        for edge_set_index in range(self.number_of_valid_edge_sets):
             self.constrain_paths_to_allowed_edges(self.edge_set_id_to_edge_set[edge_set_index])
 
             for snode in self.substrate.nodes:
@@ -1563,21 +1563,18 @@ class OptimizedDynVMPNode(object):
 
 
     def get_node_mapping_based_on_index(self, mapping_index):
+
         if mapping_index < 0 or mapping_index >= self.number_of_potential_node_mappings:
             raise ValueError("Given index {} is out of bounds [0,...,{}].".format(mapping_index,
                                                                                   self.number_of_potential_node_mappings))
-
-
         result_node_mapping = {}
         for reversed_reqnode_index in range(self.number_of_request_nodes):
             request_node = self._reversed_contained_request_nodes[reversed_reqnode_index]
             number_of_allowed_nodes_for_request_node =  self.number_of_allowed_nodes[request_node]
-            snode_index = mapping_index % number_of_allowed_nodes_for_request_node
+            snode_index = int(mapping_index) % number_of_allowed_nodes_for_request_node #necessary in python3 because no automatic cast is performed
             snode = self.allowed_nodes[request_node][snode_index]
             result_node_mapping[request_node] = snode
             mapping_index /= number_of_allowed_nodes_for_request_node
-
-
 
         return result_node_mapping
 
@@ -1610,12 +1607,12 @@ class OptimizedDynVMPNode(object):
         self.allowed_node_indexes = {reqnode: [x for x in range(self.number_of_allowed_nodes[reqnode])] for reqnode in self.contained_request_nodes}
 
 
-        self.number_of_potential_node_mappings =  int(np.prod(self.number_of_allowed_nodes.values()))
+        self.number_of_potential_node_mappings =  int(np.prod(list(self.number_of_allowed_nodes.values())))
         if self.number_of_potential_node_mappings < 1:
             raise ValueError("There exist no valid node mappings")
 
         minimal_number_different_node_mappings = min([self.number_of_allowed_nodes[reqnode] for reqnode in self.contained_request_nodes])
-        maximal_size_of_index_array = self.number_of_potential_node_mappings / minimal_number_different_node_mappings
+        maximal_size_of_index_array = self.number_of_potential_node_mappings // minimal_number_different_node_mappings
 
         self.list_for_indices = [0]*maximal_size_of_index_array
 
@@ -1693,14 +1690,14 @@ class OptimizedDynVMPNode(object):
             #EDGE COSTS
 
             edgeset_id_to_reqedges_mapping = self.vmrc.get_edgeset_id_to_reqedge_mapping()
-            edgeset_id_to_forgotten_reqedges_mapping = {edge_set_id : [reqedge for reqedge in edgeset_id_to_reqedges_mapping[edge_set_id] if reqedge in self.forgotten_virtual_elements_out_neigbor[1]] for edge_set_id in edgeset_id_to_reqedges_mapping.keys()}
+            edgeset_id_to_forgotten_reqedges_mapping = {edge_set_id : [reqedge for reqedge in edgeset_id_to_reqedges_mapping[edge_set_id] if reqedge in self.forgotten_virtual_elements_out_neigbor[1]] for edge_set_id in list(edgeset_id_to_reqedges_mapping.keys())}
 
             self.local_edge_cost_length = {edge_set_id: int(len(edgeset_id_to_forgotten_reqedges_mapping[edge_set_id])) for edge_set_id
-                                          in edgeset_id_to_reqedges_mapping.keys()}
+                                          in list(edgeset_id_to_reqedges_mapping.keys())}
 
             self.local_edge_cost_update_list = []
 
-            for edge_set_id in edgeset_id_to_reqedges_mapping.keys():
+            for edge_set_id in list(edgeset_id_to_reqedges_mapping.keys()):
                 if self.local_edge_cost_length[edge_set_id] > 0:
 
                     local_edge_cost_indices_array = np.full(
@@ -1785,7 +1782,7 @@ class OptimizedDynVMPNode(object):
 
         self.mapping_costs = np.nanmin(in_neighbor.mapping_costs[self.minimum_selection_pull], axis=1)
         #out_neighbor.mapping_costs[self.minimum_selection_push] += self.mapping_costs
-        for local_node_mapping_index in xrange(int(self.number_of_potential_node_mappings)):
+        for local_node_mapping_index in range(int(self.number_of_potential_node_mappings)):
         #     self.mapping_costs[local_node_mapping_index] = np.nanmin(in_neighbor.mapping_costs[self.minimum_selection_pull[local_node_mapping_index,:]])
              out_neighbor.mapping_costs[self.minimum_selection_push[local_node_mapping_index,:]] += self.mapping_costs[local_node_mapping_index]
 
@@ -1849,12 +1846,12 @@ class OptimizedDynVMP(object):
         if snode_costs is None:
             self.snode_costs = {snode: 1.0 for snode in self.substrate.nodes}
         else:
-            self.snode_costs = {snode: snode_costs[snode] for snode in snode_costs.keys()}
+            self.snode_costs = {snode: snode_costs[snode] for snode in list(snode_costs.keys())}
 
         if sedge_costs is None:
             self.sedge_costs = {sedge: 1.0 for sedge in self.substrate.edges}
         else:
-            self.sedge_costs = {sedge: sedge_costs[sedge] for sedge in sedge_costs.keys()}
+            self.sedge_costs = {sedge: sedge_costs[sedge] for sedge in list(sedge_costs.keys())}
 
         self.sedge_latencies = {sedge: self.substrate.edge[sedge].get("latency", 1) for sedge in self.substrate.edges}
 
@@ -1862,7 +1859,7 @@ class OptimizedDynVMP(object):
                                [self.request.get_edge_demand(reqedge) for reqedge in self.request.edges])
 
         self._max_cost = max(
-            [cost for cost in self.snode_costs.values()] + [cost for cost in self.sedge_costs.values()])
+            [cost for cost in list(self.snode_costs.values())] + [cost for cost in list(self.sedge_costs.values())])
 
         self._mapping_cost_bound = self._max_demand * self._max_cost * 2.0 * len(self.request.edges) * len(self.substrate.edges)
 
@@ -1871,7 +1868,7 @@ class OptimizedDynVMP(object):
     def initialize_data_structures(self):
         self.vmrc.compute()
 
-        print ("finding shortest paths for {} using {}".format(self.request.name, self.lat_approx_type))
+        print(("finding shortest paths for {} using {}".format(self.request.name, self.lat_approx_type)))
         self.svpc.compute()
 
 
@@ -1959,9 +1956,9 @@ class OptimizedDynVMP(object):
                                     self.substrate,
                                     True)
 
-        for reqnode, mapping_thereof in reqnode_mappings.iteritems():
+        for reqnode, mapping_thereof in reqnode_mappings.items():
             result_mapping.map_node(reqnode, mapping_thereof)
-        for reqedge, mapping_thereof in reqedge_mappings.iteritems():
+        for reqedge, mapping_thereof in reqedge_mappings.items():
             result_mapping.map_edge(reqedge, mapping_thereof)
 
         return root_cost, result_mapping
@@ -2012,9 +2009,11 @@ class OptimizedDynVMP(object):
                 # no mapping could be found
                 return None, None
 
+            if not (isinstance(best_mapping_index, int) or isinstance(best_mapping_index, np.int64)):
+                assert (isinstance(best_mapping_index, int) or isinstance(best_mapping_index, np.int64))
             corresponding_node_mapping = dynvmp_treenode.get_node_mapping_based_on_index(best_mapping_index)
 
-            for request_node, substrate_node in corresponding_node_mapping.iteritems():
+            for request_node, substrate_node in corresponding_node_mapping.items():
                 if request_node in fixed_node_mappings:
                     if fixed_node_mappings[request_node] != substrate_node:
                         raise ValueError(
@@ -2076,24 +2075,24 @@ class TreeDecompositionComputation(object):
             p = subprocess.Popen("./tw-exact", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             stdoutdata, stderrdata = None, None
             try:
-                stdoutdata, stderrdata = p.communicate(input=td_alg_input, timeout=self.timeout)
+                stdoutdata, stderrdata = p.communicate(input=td_alg_input.encode(), timeout=self.timeout)
             except subprocess.TimeoutExpired:
                 self.logger.info("Timeout expired when trying to compute tree decomposition. Killing process and discarding potential result.")
                 p.kill()
                 p.communicate()
             if not stderrdata:
-                result = self._convert_result_format_to_tree_decomposition(stdoutdata)
+                result = self._convert_result_format_to_tree_decomposition(stdoutdata.decode())
         except subprocess.CalledProcessError as e:
-            print "Subprocess Error:"
-            print e
-            print "Return code {}".format(e.returncode)
+            print("Subprocess Error:")
+            print(e)
+            print("Return code {}".format(e.returncode))
         finally:
             os.chdir(curr_dir)
         return result
 
     def _convert_graph_to_td_input_format(self):
         self.map_nodes_to_numeric_id = {node: str(idx) for (idx, node) in enumerate(sorted(self.graph.nodes), 1)}
-        self.map_numeric_id_to_nodes = {v: k for (k, v) in self.map_nodes_to_numeric_id.items()}
+        self.map_numeric_id_to_nodes = {v: k for (k, v) in list(self.map_nodes_to_numeric_id.items())}
         lines = ["p tw {} {}".format(len(self.graph.nodes), len(self.graph.edges))]
         for edge in sorted(self.graph.edges):
             i, j = edge
@@ -2375,7 +2374,7 @@ class SeparationLP_OptDynVMP(object):
         for index, new_var in enumerate(current_new_variables):
             #handle allocations
             corresponding_allocation = current_new_allocations[index]
-            for sres, alloc in corresponding_allocation.iteritems():
+            for sres, alloc in corresponding_allocation.items():
                 constr = self.capacity_constraints[sres]
                 self.model.chgCoeff(constr, new_var, alloc)
 
@@ -2535,7 +2534,7 @@ class SeparationLP_OptDynVMP(object):
 
     ###
     ###     GUROBI SETTINGS
-    ###     The following is copy-pasted from the basic modelcreator in the alib, as the separation approach
+    ###     The following is copy-pasted from the basic modelcreator in the alib3, as the separation approach
     ###     breaks the structure of computing a simple LP or IP.
     ###
 
@@ -2684,7 +2683,7 @@ class RandRoundSepLPOptDynVMPCollectionResult(modelcreator.AlgorithmResult):
 
     def add_solution(self, rounding_order, lp_recomputation_mode, solution):
         identifier = (lp_recomputation_mode, rounding_order)
-        if identifier not in self.solutions.keys():
+        if identifier not in list(self.solutions.keys()):
             self.solutions[identifier] = []
         solution_index = len(self.solutions[identifier])
         self.solutions[identifier].append(solution)
@@ -2699,7 +2698,7 @@ class RandRoundSepLPOptDynVMPCollectionResult(modelcreator.AlgorithmResult):
 
 
     def _cleanup_references_raw(self, original_scenario):
-        for identifier in self.solutions.keys():
+        for identifier in list(self.solutions.keys()):
             #search for best solution and remove mapping information of all other solutions
             list_of_solutions = self.solutions[identifier]
             best_solution = max(list_of_solutions, key= lambda x: x.profit)
@@ -2743,7 +2742,7 @@ class RandRoundSepLPOptDynVMPCollectionResult(modelcreator.AlgorithmResult):
 
     def _get_solution_overview(self):
         result = "\n\t{:^10s} | {:^40s} {:^20s} | {:^8s}\n".format("PROFIT", "LP Recomputation Mode", "Rounding Order", "INDEX")
-        for identifier in self.solutions.keys():
+        for identifier in list(self.solutions.keys()):
             for solution_index, solution in enumerate(self.solutions[identifier]):
                 result += "\t" + "{:^10.5f} | {:^40s} {:^20s} | {:<8d}\n".format(solution.profit,
                                                                                  identifier[0].value,
@@ -2977,8 +2976,8 @@ class RandRoundSepLPOptDynVMPCollection(object):
         for index, new_var in enumerate(current_new_variables):
             #handle allocations
             corresponding_allocation = current_new_allocations[index]
-            for sres, alloc in corresponding_allocation.iteritems():
-                if sres not in self.capacity_constraints.keys():
+            for sres, alloc in corresponding_allocation.items():
+                if sres not in list(self.capacity_constraints.keys()):
                     continue
                 constr = self.capacity_constraints[sres]
                 self.model.chgCoeff(constr, new_var, alloc)
@@ -3283,7 +3282,7 @@ class RandRoundSepLPOptDynVMPCollection(object):
 
         self.logger.debug("Executing rounding according to settings: {} {}".format(lp_computation_mode.value, rounding_order.value))
 
-        for q in xrange(self.rounding_samples_per_lp_recomputation_mode[lp_computation_mode]):
+        for q in range(self.rounding_samples_per_lp_recomputation_mode[lp_computation_mode]):
             #recompute optimal solution
             self.model.optimize()
 
@@ -3368,7 +3367,7 @@ class RandRoundSepLPOptDynVMPCollection(object):
                 if self.check_whether_mapping_would_obey_resource_violations(A, self.allocations_of_mappings[req][chosen_mapping[0]]):
                     B += req.profit
                     for res in self.substrate_resources:
-                        if res in self.allocations_of_mappings[req][chosen_mapping[0]].keys():
+                        if res in list(self.allocations_of_mappings[req][chosen_mapping[0]].keys()):
                             A[res] += self.allocations_of_mappings[req][chosen_mapping[0]][res]
 
                     if lp_computation_mode != LPRecomputationMode.NONE:
@@ -3436,7 +3435,7 @@ class RandRoundSepLPOptDynVMPCollection(object):
 
     ###
     ###     GUROBI SETTINGS
-    ###     The following is copy-pasted from the basic modelcreator in the alib, as the separation approach
+    ###     The following is copy-pasted from the basic modelcreator in the alib3, as the separation approach
     ###     breaks the structure of computing a simple LP or IP.
     ###
 
@@ -3599,7 +3598,7 @@ class DynVMPAlgorithm(object):
 
         for t in self.tree_decomposition_arb.post_order_traversal():
             bag_nodes = self.tree_decomposition.node_bag_dict[t]
-            for bag_mapping in self.cost_table[t].iterkeys():
+            for bag_mapping in self.cost_table[t].keys():
                 ind_cost = self._induced_edge_cost(sorted(bag_nodes), bag_mapping)
                 if ind_cost != INFINITY:
                     children_valid = True
@@ -3607,7 +3606,7 @@ class DynVMPAlgorithm(object):
                         best_child_bag_mapping = None
                         best_child_mapping_cost = INFINITY
                         child_bag_nodes = self.tree_decomposition.node_bag_dict[t_child]
-                        for child_bag_mapping, child_mapping_cost in self.cost_table[t_child].iteritems():
+                        for child_bag_mapping, child_mapping_cost in self.cost_table[t_child].items():
                             if child_mapping_cost == INFINITY:
                                 continue
                             elif child_mapping_cost > best_child_mapping_cost:
@@ -3683,7 +3682,7 @@ class DynVMPAlgorithm(object):
     def _find_best_root_bag_mapping(self):
         best_root_bag_mapping = None
         best_root_mapping_cost = INFINITY
-        for root_bag_mapping, cost in self.cost_table[self.tree_decomposition_arb.root].iteritems():
+        for root_bag_mapping, cost in self.cost_table[self.tree_decomposition_arb.root].items():
             if cost < best_root_mapping_cost:
                 best_root_mapping_cost = cost
                 best_root_bag_mapping = root_bag_mapping
@@ -3693,7 +3692,7 @@ class DynVMPAlgorithm(object):
         self.cost_table = {}
         self.mapping_table = {}
 
-        for (t, bag_nodes) in self.tree_decomposition.node_bag_dict.iteritems():
+        for (t, bag_nodes) in self.tree_decomposition.node_bag_dict.items():
             self.cost_table[t] = {}
             self.mapping_table[t] = {}
             for node_bag_mapping in mapping_space(self.request, self.substrate, sorted(bag_nodes)):
@@ -3729,7 +3728,7 @@ class DynVMPAlgorithm(object):
         return cost
 
     def shortest_path(self, start, target, min_capacity):
-        # TODO: could add this to the alib by extending Graph.initialize_shortest_paths_costs()
+        # TODO: could add this to the alib3 by extending Graph.initialize_shortest_paths_costs()
         # Dijkstra algorithm (https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Pseudocode)
         distance = {node: INFINITY for node in self.substrate.nodes}
         prev = {u: None for u in self.substrate.nodes}
@@ -3818,7 +3817,7 @@ class _TreewidthModelCreator(modelcreator.AbstractEmbeddingModelCreator):
     def _create_y_variables(self, req):
         td = self.tree_decompositions[req.name]
         self.y_vars[req.name] = {}
-        for bag_id, bag_nodes in td.node_bag_dict.items():
+        for bag_id, bag_nodes in list(td.node_bag_dict.items()):
             self.y_vars[req.name][bag_id] = {}
             for a in mapping_space(req, self.substrate, sorted(bag_nodes)):
                 variable_name = construct_name_tw_lp("bag_mapping", req_name=req.name, bag=bag_id, bag_mapping=a)
@@ -3853,7 +3852,7 @@ class _TreewidthModelCreator(modelcreator.AbstractEmbeddingModelCreator):
             constr_name = construct_name_tw_lp("embed_bags_equally", req_name=req.name, bag=bag)
             expr = LinExpr(
                 [(-1.0, self.var_embedding_decision[req])] +
-                [(1.0, var) for bag_mapping, var in self.y_vars[req.name][bag].items()]
+                [(1.0, var) for bag_mapping, var in list(self.y_vars[req.name][bag].items())]
             )
             self.model.addConstr(LinExpr(expr), GRB.EQUAL, 0.0, constr_name)
 

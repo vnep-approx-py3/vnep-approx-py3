@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.basemap import Basemap as Basemap
 
-from alib import scenariogeneration
+from alib3 import scenariogeneration
 from . import extendedgraph
 
 MapCoordinate = namedtuple("MapCoordinate", "lon lat")
@@ -99,7 +99,7 @@ class ExtendedGraphVisualizer(object):
         fig = plt.figure()
         ax = plt.subplot(111)
         nodes_to_map_coordinates = [MapCoordinate(lat=data['Latitude'], lon=data['Longitude'])
-                                    for n, data in self._substrate.node.items()]
+                                    for n, data in list(self._substrate.node.items())]
         lower_left, upper_right = ExtendedGraphVisualizer._get_corner_map_coordinates(nodes_to_map_coordinates)
         self._background_map = Basemap(resolution="c",
                                        projection='merc',
@@ -156,10 +156,10 @@ class ExtendedGraphVisualizer(object):
 
     def _add_nodes_and_map_to_axis(self, ax):
         nodes_to_map_coordinates = {n: MapCoordinate(lat=data['Latitude'], lon=data['Longitude'])
-                                    for n, data in self._substrate.node.items()}
+                                    for n, data in list(self._substrate.node.items())}
 
         nodes_to_data_coordinates = {node: self._background_map(mc.lon, mc.lat) for node, mc in
-                                     nodes_to_map_coordinates.iteritems()}
+                                     nodes_to_map_coordinates.items()}
         nodes = self._substrate.nodes
         xy = np.asarray([nodes_to_data_coordinates[v] for v in nodes])
 
@@ -272,14 +272,14 @@ class ExtendedGraphVisualizer(object):
             if not os.path.exists(os.path.dirname(output_path)):
                 os.makedirs(os.path.dirname(output_path))
             output_path = os.path.abspath(output_path)
-            print "saving to", output_path
+            print("saving to", output_path)
             plt.savefig(output_path, dpi=200)
         plt.close('all')
 
 
 def example():
-    from alib import datamodel
-    reader = scenariogeneration.TopologyZooReader(path="../../github-alib/data/topologyZoo")
+    from alib3 import datamodel
+    reader = scenariogeneration.TopologyZooReader(path="../../github-alib3/data/topologyZoo")
     substrate = reader.read_from_yaml(
         dict(topology="Aarnet",
              edge_capacity=1.0,

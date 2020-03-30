@@ -3,9 +3,9 @@ import random
 
 import pytest
 
-from alib import datamodel, modelcreator
+from alib3 import datamodel, modelcreator
 from commutativity_model_test_data import create_request, filter_requests_by_tags
-from vnep_approx import commutativity_model
+from vnep_approx3 import commutativity_model
 
 i, j, k = "ijk"
 ij = i, j
@@ -94,7 +94,7 @@ def test_solve_all_request_scenarios_with_gurobi(substrate):
         assert len(solution.request_mapping[req]) > 0
 
 
-@pytest.mark.parametrize("seed", range(10))
+@pytest.mark.parametrize("seed", list(range(10)))
 def test_integral_solution_random_request_with_gurobi(seed, substrate):
     random.seed(seed)
     req = generate_random_request_graph(10, 0.25)
@@ -110,7 +110,7 @@ def test_integral_solution_random_request_with_gurobi(seed, substrate):
     assert req in solution.request_mapping
 
 
-@pytest.mark.parametrize("seed", range(10))
+@pytest.mark.parametrize("seed", list(range(10)))
 def test_integral_solution_multiple_random_requests_with_gurobi(seed, substrate):
     random.seed(seed)
     requests = [generate_random_request_graph(7, 0.25, "test_req_{}".format(i))
@@ -130,7 +130,7 @@ def test_integral_solution_multiple_random_requests_with_gurobi(seed, substrate)
         assert req in solution.request_mapping
 
 
-@pytest.mark.parametrize("seed", range(10))
+@pytest.mark.parametrize("seed", list(range(10)))
 def test_fractional_solution_random_request_with_gurobi(seed, substrate):
     random.seed(seed)
     req = generate_random_request_graph(10, 0.25)
@@ -146,7 +146,7 @@ def test_fractional_solution_random_request_with_gurobi(seed, substrate):
     assert len(solution.request_mapping[req]) > 0
 
 
-@pytest.mark.parametrize("seed", range(10))
+@pytest.mark.parametrize("seed", list(range(10)))
 def test_fractional_solution_multiple_random_requests_with_gurobi(seed, substrate):
     random.seed(seed)
     requests = [generate_random_request_graph(7, 0.25, "test_req_{}".format(i))

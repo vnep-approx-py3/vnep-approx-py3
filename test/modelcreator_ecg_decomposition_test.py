@@ -1,15 +1,17 @@
 import copy
 
 import pytest
+import numpy as np
 from gurobipy import GRB
 
-from alib import datamodel, mip, modelcreator, scenariogeneration, solutions
-from vnep_approx import extendedcactusgraph, modelcreator_ecg_decomposition
+from alib3 import datamodel, mip, modelcreator, scenariogeneration, solutions
+from vnep_approx3 import extendedcactusgraph, modelcreator_ecg_decomposition
 
 
 class TestCactusModelCreator:
     def setup(self):
         scenariogeneration.random.seed(5)
+        np.random.seed(0)
         self.substrate = datamodel.Substrate("paper_example_substrate")
         self.substrate.add_node("u", ["universal"], {"universal": 10}, {"universal": 0.8})
         self.substrate.add_node("v", ["universal"], {"universal": 10}, {"universal": 1.2})
@@ -253,7 +255,7 @@ class TestCactusModelCreator:
         sol_mcf = mc_mcf.compute_integral_solution().get_solution()
         sol_mcf.validate_solution_fulfills_capacity()
 
-        assert any(m.is_embedded for m in sol_mcf.request_mapping.values())
+        assert any(m.is_embedded for m in list(sol_mcf.request_mapping.values()))
 
         mc_ecg_fixed_mapping = modelcreator_ecg_decomposition.ModelCreatorCactusDecomposition(real_scenario)
         mc_ecg_fixed_mapping.init_model_creator()
@@ -265,8 +267,8 @@ class TestCactusModelCreator:
         for req in usable_requests:
             mcf_mapping = sol_mcf.request_mapping[req]
             ecg_mapping = sol_ecg_fixed_mapping.get_solution().request_mapping[req]
-            print mcf_mapping.mapping_nodes
-            print ecg_mapping.mapping_nodes
+            print(mcf_mapping.mapping_nodes)
+            print(ecg_mapping.mapping_nodes)
             assert mcf_mapping.mapping_nodes == ecg_mapping.mapping_nodes
             assert mcf_mapping.mapping_edges == ecg_mapping.mapping_edges
 
@@ -276,7 +278,7 @@ class TestCactusModelCreator:
         mc_ecg_fixed_mapping.set_gurobi_parameter(modelcreator.Param_TimeLimit, time_limit)
         sol_ecg = mc_ecg_fixed_mapping.compute_integral_solution().get_solution()
 
-        assert any(m.is_embedded for m in sol_ecg.request_mapping.values())
+        assert any(m.is_embedded for m in list(sol_ecg.request_mapping.values()))
 
         mc_mcf_fixed_mapping = mip.ClassicMCFModel(real_scenario)
         mc_mcf_fixed_mapping.init_model_creator()
@@ -332,8 +334,8 @@ class TestCactusModelCreator:
                         "max_number_of_nodes": 5,
                         "probability": 1,
                         "potential_nodes_factor": 0.1,
-                        "node_resource_factor": 0.25,
-                        "edge_resource_factor": 5,
+                        "node_resource_factor": 0.1,
+                        "edge_resource_factor": 10,
                         "normalize": True,
                         "arbitrary_edge_orientations": False,
                         "profit_factor": 1.0,

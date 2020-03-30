@@ -23,7 +23,7 @@
 
 from gurobipy import GRB, LinExpr
 
-from alib import solutions, modelcreator
+from alib3 import solutions, modelcreator
 from . import extendedgraph
 
 
@@ -201,8 +201,8 @@ class ModelCreatorDecomp(modelcreator.AbstractEmbeddingModelCreator):
                     predecessor[ee_head] = ee_tail
 
         if predecessor[ext_graph.super_sink] is None:
-            print "Predecessor dictionary:"
-            print predecessor
+            print("Predecessor dictionary:")
+            print(predecessor)
             raise DecompositionError("Decomposition did not reach super sink node!")
 
         # reconstruct path

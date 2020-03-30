@@ -22,12 +22,12 @@ class ShortestValidPathsComputerLORENZ(object):
 
         for sedge, lat in edge_latencies:
             if lat < 0:
-                print "ERROR!! lat < 0:  ", lat
+                print("ERROR!! lat < 0:  ", lat)
                 self.edge_latencies[sedge] = -lat
 
         for sedge, lat in edge_costs:
             if lat < 0:
-                print "ERROR!! cost < 0:  ", lat
+                print("ERROR!! cost < 0:  ", lat)
                 self.edge_costs[sedge] = -lat
 
 
@@ -49,10 +49,10 @@ class ShortestValidPathsComputerLORENZ(object):
     def recompute_with_new_costs(self, new_edge_costs):
         # self.edge_costs = new_edge_costs
 
-        for sedge, cost in new_edge_costs.iteritems():
+        for sedge, cost in new_edge_costs.items():
 
             if cost < 0:
-                print "WARNING: cost < 0 in recompute.  ", cost
+                print("WARNING: cost < 0 in recompute.  ", cost)
 
             self.edge_costs[sedge] = max(cost, -cost)
 
@@ -259,7 +259,7 @@ class ShortestValidPathsComputerLORENZ(object):
                         self.edge_mapping_invalidities = True
                     elif lat > self.limit:
                         self.latency_limit_overstepped = True
-                        print "WARNING: Latency limit overstepped by {} from {} to {}".format(lat - self.limit, self.num_id_to_snode_id[num_source_node], self.num_id_to_snode_id[num_target_node])
+                        print("WARNING: Latency limit overstepped by {} from {} to {}".format(lat - self.limit, self.num_id_to_snode_id[num_source_node], self.num_id_to_snode_id[num_target_node]))
 
                     if path is not None:
                         converted_path_dict[self.num_id_to_snode_id[num_target_node]] = path

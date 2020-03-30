@@ -1,6 +1,6 @@
 import pytest
-from test_data.request_test_data import create_test_request, example_requests
-from test_data.tree_decomposition_test_data import (
+from .test_data.request_test_data import create_test_request, example_requests
+from .test_data.tree_decomposition_test_data import (
     create_test_tree_decomposition,
     VALID_TREE_DECOMPOSITIONS,
     INVALID_TREE_DECOMPOSITION_INTERSECTION_PROPERTY,
@@ -11,7 +11,7 @@ from test_data.tree_decomposition_test_data import (
     CHECK_COMPATIBLE_MAPPINGS_INVALID_EXAMPLES,
     NICE_TREE_DECOMPOSITIONS,
 )
-from vnep_approx import treewidth_model
+from vnep_approx3 import treewidth_model
 
 
 @pytest.mark.parametrize("request_id",

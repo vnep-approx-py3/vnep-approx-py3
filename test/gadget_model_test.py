@@ -2,8 +2,8 @@ import random
 
 import pytest
 
-from alib import datamodel, scenariogeneration, solutions, util
-from vnep_approx import gadget_model, modelcreator_ecg_decomposition
+from alib3 import datamodel, scenariogeneration, solutions, util
+from vnep_approx3 import gadget_model, modelcreator_ecg_decomposition
 
 
 def get_test_triangle_substrate():
@@ -403,7 +403,7 @@ class TestCactusGadget:
         cactus_request1.add_edge("int_1", "cr2_1", 1)
 
         for case in range(6):
-            print "case", case
+            print("case", case)
             expected_mapping_nodes, expected_mapping_edges = self._configure_substrate_different_costs(case)
 
             self.gcr = gadget_model.GadgetContainerRequest("foo", 1234567)
@@ -440,7 +440,7 @@ class TestCactusGadget:
         cactus_request2.add_edge("int_1", "cr2_1", 1)
 
         for case in range(6):
-            print "case", case
+            print("case", case)
             expected_mapping_nodes, expected_mapping_edges = self._configure_substrate_different_costs(case)
 
             self.gcr = gadget_model.GadgetContainerRequest("foo", 1234567)
@@ -844,7 +844,7 @@ class TestCactusGadget:
             i: root_req for i in root_out_nodes
         }
         for req in cactus_requests[1:]:
-            in_node, parent_req = random.choice(out_node_map.items())
+            in_node, parent_req = random.choice(list(out_node_map.items()))
             out_nodes = random.sample(list(req.nodes), random.randint(1, 2))
             out_node_map.update({i: req for i in out_nodes})
             connect_gadgets_with_single_edge(parent_req, in_node, req)
@@ -994,7 +994,7 @@ class TestDecisionGadget:
         sol = mmc.compute_fractional_solution()
 
         expected_profit = self.gcr.profit
-        mapping_list = sol.request_mapping.values()[0]
+        mapping_list = list(sol.request_mapping.values())[0]
         for mapping in mapping_list:
             flow = sol.mapping_flows[mapping.name]
             for ij in mapping.mapping_edges:
@@ -1108,7 +1108,7 @@ class TestDecisionGadget:
         assert (sol.request_mapping[self.gcr][0].mapping_edges
                 == combined_sol.request_mapping[combined_gcr][0].mapping_edges)
 
-    @pytest.mark.parametrize("repetition", range(50))
+    @pytest.mark.parametrize("repetition", list(range(50)))
     def test_chained_decision_gadgets_same_result_as_combined_gadget(self, repetition):
         # There was a bug where some of the node loads were tracked incorrectly by the DecisionGadget.
         randomize_substrate_costs(self.substrate)
@@ -1179,7 +1179,7 @@ class TestDecisionGadget:
         )
         gmc.init_model_creator()
 
-        for i, u_var_dict in gadget.gurobi_vars["node_flow"].iteritems():
+        for i, u_var_dict in gadget.gurobi_vars["node_flow"].items():
             for u in u_var_dict:
                 gadget.gurobi_vars["node_flow"][i][u] = MockVar()
         for ext_edge in gadget.gurobi_vars["edge_flow"]:
@@ -1240,8 +1240,8 @@ class TestDecisionGadget:
 
         expected = set([(
             md["flow"],
-            frozenset(md["mapping_nodes"].items()),
-            frozenset((k, tuple(v)) for k, v in md["mapping_edges"].items())
+            frozenset(list(md["mapping_nodes"].items())),
+            frozenset((k, tuple(v)) for k, v in list(md["mapping_edges"].items()))
         )
             for md in mapping_dicts])
 
@@ -1253,7 +1253,7 @@ class TestDecisionGadget:
             gadget.reduce_flow_on_last_returned_mapping(flow)
 
             obtained.add(
-                (flow, frozenset(m.mapping_nodes.items()), frozenset((k, tuple(v)) for k, v in m.mapping_edges.items()))
+                (flow, frozenset(list(m.mapping_nodes.items())), frozenset((k, tuple(v)) for k, v in list(m.mapping_edges.items())))
             )
         assert expected == obtained
 
@@ -1262,7 +1262,7 @@ class TestDecisionGadget:
         flow = mapping_dict["flow"]
         request_source_sink_node_set = set(ext_graph.source_nodes.keys()) | set(ext_graph.sink_nodes.keys())
 
-        for i, u in mapping_dict["mapping_nodes"].items():
+        for i, u in list(mapping_dict["mapping_nodes"].items()):
             if i in request_source_sink_node_set:
                 gadget.gurobi_vars["node_flow"][i][u].x += flow
 
@@ -1271,7 +1271,7 @@ class TestDecisionGadget:
                     ext_edge = ext_graph.in_edges[ext_node][0]
                     gadget.gurobi_vars["edge_flow"][ext_edge].x += flow
 
-        for ij, uv_list in mapping_dict["mapping_edges"].iteritems():
+        for ij, uv_list in mapping_dict["mapping_edges"].items():
             i, j = ij
             u = mapping_dict["mapping_nodes"][i]
 
@@ -1444,7 +1444,7 @@ class TestMixedGadget:
 
         # assert that decided cactus gadget is also mapped
         out_mapped_flag = False
-        for gagdet in self.gcr.gadgets.values():
+        for gagdet in list(self.gcr.gadgets.values()):
             if dec_out_node == gagdet.in_node:
                 for out_node in decision_gadget.out_nodes:
                     if out_node in mapping.mapping_nodes:
@@ -1572,9 +1572,9 @@ class TestMixedGadget:
                 edge_group_color_function = util.graph_viz_edge_color_according_to_request_list(edge_groups, colors)
                 return edge_group_color_function(e) + ",penwidth={}".format(6.0 if e in m.mapping_edges else 2.0)
 
-            print util.get_graph_viz_string(
+            print(util.get_graph_viz_string(
                 combined,
                 get_edge_style=edge_style
-            )
+            ))
 
         assert len(gadget_solution.request_mapping[container_request]) != 0

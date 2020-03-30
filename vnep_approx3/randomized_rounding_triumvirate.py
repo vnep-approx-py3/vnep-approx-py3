@@ -27,7 +27,7 @@ from random import Random
 
 from gurobipy import GRB, LinExpr
 
-from alib import modelcreator
+from alib3 import modelcreator
 from . import modelcreator_ecg_decomposition
 
 random = Random("randomized_rounding")
@@ -183,12 +183,12 @@ class RandomizedRoundingTriumvirate(object):
     def collect_X_randomized_rounding_samples_with_potential_violations(self, number_of_samples):
         L = {}
         data = []
-        for q in xrange(number_of_samples):
-            time_rr0 = time.clock()
+        for q in range(number_of_samples):
+            time_rr0 = time.perf_counter()
 
             profit, max_node_load, max_edge_load = self.rounding_iteration_violations_allowed_sampling_max_violations(L)
 
-            time_rr = time.clock() - time_rr0
+            time_rr = time.perf_counter() - time_rr0
 
             solution_tuple = RandomizedRoundingSolutionData(profit=profit,
                                                             max_node_load=max_node_load,
@@ -233,12 +233,12 @@ class RandomizedRoundingTriumvirate(object):
 
         best_solution_tuple = None
 
-        for q in xrange(number_of_samples):
-            time_rr0 = time.clock()
+        for q in range(number_of_samples):
+            time_rr0 = time.perf_counter()
 
             profit, max_node_load, max_edge_load = self.rounding_iteration_violations_without_violations(L, outer_tries=5)
 
-            time_rr = time.clock() - time_rr0
+            time_rr = time.perf_counter() - time_rr0
 
             solution_tuple = RandomizedRoundingSolutionData(profit=profit,
                                                             max_node_load=max_node_load,

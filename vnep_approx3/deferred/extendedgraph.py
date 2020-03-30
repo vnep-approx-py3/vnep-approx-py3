@@ -23,7 +23,7 @@
 
 import logging
 
-from alib import datamodel
+from alib3 import datamodel
 
 
 class ExtendedGraph(datamodel.Graph):
@@ -83,7 +83,7 @@ class ExtendedGraph(datamodel.Graph):
 
         # 2. between nodes
         if len(request.sequence) > 2:
-            for req_index in xrange(0, len(request.sequence) - 2):
+            for req_index in range(0, len(request.sequence) - 2):
                 current = request.sequence[req_index]
                 nextnode = request.sequence[req_index + 1]
                 nextnode_type = request.get_type(nextnode)

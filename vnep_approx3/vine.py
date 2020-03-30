@@ -6,11 +6,11 @@ from gurobipy import GRB, LinExpr
 import itertools
 from collections import namedtuple
 
-from alib import datamodel as dm
-from alib import mip as mip
-from alib import modelcreator as mc
-from alib import solutions
-from alib import util
+from alib3 import datamodel as dm
+from alib3 import mip as mip
+from alib3 import modelcreator as mc
+from alib3 import solutions
+from alib3 import util
 
 
 @enum.unique
@@ -65,7 +65,7 @@ class ViNESettingsFactory(object):
                                    lp_objective=lp_objective,
                                    rounding_procedure=rounding_procedure)
 
-        if temp_result in ViNESettingsFactory._known_vine_settings.keys():
+        if temp_result in list(ViNESettingsFactory._known_vine_settings.keys()):
             return ViNESettingsFactory._known_vine_settings[temp_result]
         else:
             ViNESettingsFactory._known_vine_settings[temp_result] = temp_result
@@ -75,7 +75,7 @@ class ViNESettingsFactory(object):
     def get_vine_settings_from_settings(vine_settings):
         ViNESettingsFactory.check_vine_settings(vine_settings)
 
-        if vine_settings in ViNESettingsFactory._known_vine_settings.keys():
+        if vine_settings in list(ViNESettingsFactory._known_vine_settings.keys()):
             return ViNESettingsFactory._known_vine_settings[vine_settings]
         else:
             ViNESettingsFactory._known_vine_settings[vine_settings] = vine_settings
@@ -106,7 +106,7 @@ class OfflineViNEResult(mc.AlgorithmResult):
 
     def compute_profit(self):
         profit = 0.0
-        for req, mapping in self.solution.request_mapping.iteritems():
+        for req, mapping in self.solution.request_mapping.items():
             if mapping is not None:
                 profit += req.profit
         return profit
@@ -144,7 +144,7 @@ class SplittableMapping(solutions.Mapping):
 
     def map_edge(self, ij, edge_vars):
         self.mapping_edges[ij] = {
-            uv: val for (uv, val) in edge_vars.iteritems()
+            uv: val for (uv, val) in edge_vars.items()
             if abs(val) >= SplittableMapping.EPSILON
         }
 
@@ -280,7 +280,7 @@ class FractionalClassicMCFModel(mip.ClassicMCFModel):
 
     def create_constraints_fix_node_mappings(self, req, node_mapping_dict):
         """ Add constraints which enforce the node mappings specified in node_mapping_dict. """
-        for i, u_mapped in node_mapping_dict.iteritems():
+        for i, u_mapped in node_mapping_dict.items():
             for u in req.get_allowed_nodes(i):
                 fix_i_u_mapping_constraint = LinExpr([(1.0, self.var_y[req][i][u])])
                 name = "{req}_fix_{i}_{u}".format(req=req.name, i=i, u=u)
@@ -544,7 +544,7 @@ class ViNESingleScenario(object):
         for ij in self._current_request.edges:
             mapping.map_edge(ij, lp_vars[ij])
             ij_demand = self._current_request.get_edge_demand(ij)
-            for uv, alloc in lp_vars[ij].iteritems():
+            for uv, alloc in lp_vars[ij].items():
                 self._provisional_edge_allocations[uv] += alloc * ij_demand
         return mapping
 
@@ -595,10 +595,10 @@ class ViNESingleScenario(object):
         :param m:
         :return:
         """
-        for node_resource, alloc in self._provisional_node_allocations.iteritems():
+        for node_resource, alloc in self._provisional_node_allocations.items():
             u, node_type = node_resource
             self.residual_capacity_substrate.node[u]["capacity"][node_type] -= alloc
-        for uv, alloc in self._provisional_edge_allocations.iteritems():
+        for uv, alloc in self._provisional_edge_allocations.items():
             self.residual_capacity_substrate.edge[uv]["capacity"] -= alloc
 
     def _get_empty_mapping_of_correct_type(self):
@@ -632,7 +632,7 @@ class DeterministicNodeMapper(AbstractViNENodeMapper):
         """ Deterministic node mapping: Node mapping is selected according to the maximal variable in the LP solution. """
         u_max = None
         p_max = float('-inf')
-        for u, p_u in node_variables[i].iteritems():
+        for u, p_u in node_variables[i].items():
             if u not in allowed_nodes:
                 continue
             if p_max < p_u:
@@ -660,7 +660,7 @@ class RandomizedNodeMapper(AbstractViNENodeMapper):
         if draw >= 1.0: #in case that numerical difficulties arise, simply select the last one
             draw = 0.999
 
-        for u, p_u in node_variables[i].iteritems():
+        for u, p_u in node_variables[i].items():
             if u not in allowed_nodes:
                 continue
             if draw < p_u:
@@ -682,7 +682,7 @@ class OfflineViNEResultCollection(mc.AlgorithmResult):
     def add_solution(self, vine_settings, offline_vine_result):
         if vine_settings not in self.vine_settings_list:
             raise ValueError("VineSettings diverge from given vine_settings")
-        if vine_settings not in self.solutions.keys():
+        if vine_settings not in list(self.solutions.keys()):
             self.solutions[vine_settings] = []
         if self.scenario != offline_vine_result.solution.scenario:
             raise ValueError("Seems to be another scenario!")
@@ -699,7 +699,7 @@ class OfflineViNEResultCollection(mc.AlgorithmResult):
 
 
     def _cleanup_references_raw(self, original_scenario):
-        for vine_settings in self.solutions.keys():
+        for vine_settings in list(self.solutions.keys()):
             for (result_index, result) in self.solutions[vine_settings]:
                 for own_req, original_request in zip(self.scenario.requests, original_scenario.requests):
                     assert own_req.nodes == original_request.nodes
@@ -727,7 +727,7 @@ class OfflineViNEResultCollection(mc.AlgorithmResult):
     def _get_solution_overview(self):
         result = "\n\t{:^10s} | {:^5s} {:^20s} {:^5s} | {:^8s}\n".format("PROFIT", "MODEL", "LP-OBJECTIVE", "PROC", "INDEX")
         for vine_settings in self.vine_settings_list:
-            if vine_settings in self.solutions.keys():
+            if vine_settings in list(self.solutions.keys()):
                 for solution_index, solution in self.solutions[vine_settings]:
                     result += "\t" + "{:^10.5f} | {:^5s} {:^20s} {:^5s} | {:<8d}\n".format(solution.profit,
                                                                                       vine_settings.edge_embedding_model.value,

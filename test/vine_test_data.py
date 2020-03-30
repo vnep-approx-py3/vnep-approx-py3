@@ -1,4 +1,4 @@
-from alib import datamodel, scenariogeneration, solutions, util
+from alib3 import datamodel, scenariogeneration, solutions, util
 
 
 def create_test_substrate(substrate_id,
@@ -22,7 +22,7 @@ def create_test_substrate(substrate_id,
 
     sub = datamodel.Substrate("{}_sub".format(substrate_id.replace(" ", "_")))
     for u in sub_nodes:
-        u_types = node_capacities.get(u).keys() if u in node_capacities else ["t"]
+        u_types = list(node_capacities.get(u).keys()) if u in node_capacities else ["t"]
         u_capacities = node_capacities.get(u) if u in node_capacities else dict(t=1.0)
         u_costs = node_costs.get(u) if u in node_costs else {t: 1.0 for t in u_capacities}
         sub.add_node(u, types=u_types, capacity=u_capacities, cost=u_costs)

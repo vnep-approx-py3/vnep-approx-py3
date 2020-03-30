@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from alib import datamodel
+from alib3 import datamodel
 
 
 def filter_requests_by_tags(*tag_groups):
@@ -16,7 +16,7 @@ def filter_requests_by_tags(*tag_groups):
     if not tag_groups:
         # default: tags_args is empty: yield everything
         tag_groups = [set()]
-    for request_id, req_data in example_requests.items():
+    for request_id, req_data in list(example_requests.items()):
         if any(tags <= req_data["tags"] for tags in tag_groups):
             yield request_id
 

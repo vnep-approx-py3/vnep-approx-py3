@@ -1,14 +1,14 @@
 import pytest
-from vnep_approx import treewidth_model
+from vnep_approx3 import treewidth_model
 
 import numpy as np
 
-from alib import mip
-from alib import datamodel as dm
-from alib import util
-from test_data.request_test_data import create_test_request
-from test_data.substrate_test_data import create_test_substrate_topology_zoo
-from test_data.substrate_test_data import create_test_substrate_topology_zoo
+from alib3 import mip
+from alib3 import datamodel as dm
+from alib3 import util
+from .test_data.request_test_data import create_test_request
+from .test_data.substrate_test_data import create_test_substrate_topology_zoo
+from .test_data.substrate_test_data import create_test_substrate_topology_zoo
 
 import random
 import time
@@ -82,7 +82,6 @@ def test_shortest_valid_paths_computer_no_latencies(substrate_id, cost_spread):
 @pytest.mark.parametrize("epsilon", [1.0, 0.5, 0.1, 0.01])
 @pytest.mark.parametrize("limit_factor", [8.0, 4.0, 2.0, 1.0, 0.5])
 def test_shortest_valid_paths_with_latencies(substrate_id, cost_spread, epsilon, limit_factor):
-    return
     req = create_test_request("single edge", set_allowed_nodes=False)
     sub = create_test_substrate_topology_zoo(substrate_id, include_latencies=True)
     vmrc = treewidth_model.ValidMappingRestrictionComputer(sub, req)
