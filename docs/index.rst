@@ -1,18 +1,16 @@
-Welcome to the documentation of vnep-approx!
+Welcome to the documentation of vnep-approx3!
 ============================================
 
 .. toctree::
   :maxdepth: 1
-
-  vnep_approx/commutativity_model
-  vnep_approx/extendedcactusgraph
-  vnep_approx/extendedgraph
-  vnep_approx/gadget_model
-  vnep_approx/modelcreator_decomposition
-  vnep_approx/modelcreator_ecg_decomposition
-  vnep_approx/randomized_rounding
-  vnep_approx/randomized_rounding_triumvirate
-  vnep_approx/reduce_triumvirate_result_pickle
+  vnep_approx3/cli
+  vnep_approx3/commutativity_model
+  vnep_approx3/extendedcactusgraph
+  vnep_approx3/gadget_model
+  vnep_approx3/modelcreator_ecg_decomposition
+  vnep_approx3/randomized_rounding_triumvirate
+  vnep_approx3/treewidth_model
+  vnep_approx3/vine
 
 
 .. only:: builder_html
