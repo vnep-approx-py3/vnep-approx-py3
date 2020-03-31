@@ -212,10 +212,10 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
     def _add_constraint_root_flow_induction(self, req):
         ext_graph = self.extended_graphs[req]
         root = ext_graph.root
-        root_source_nodes = list(ext_graph.source_nodes[root].keys())  # this list contains all source nodes associated with the request root
 
         expr = LinExpr([(-1.0, self.var_embedding_decision[req])] +
-                       [(1.0, self.var_node_flow[req][root][u]) for u in root_source_nodes])
+                       [(1.0, self.var_node_flow[req][root][u]) for u in ext_graph.source_nodes[root].keys()]) # this iterates over all source nodes associated with the request root
+
 
         constr_name = modelcreator.construct_name("flow_induction_root", req_name=req.name)
         # print "Root flow induction ({}):".format(root).ljust(40), expr, "= 0"
@@ -805,10 +805,10 @@ class Decomposition(object):
 
         self.flow_values["embedding"] = min(1.0, self.flow_values["embedding"] * self.scaling_factor)
 
-        for vnode in list(self.flow_values["node"].keys()):
-            for snode in list(self.flow_values["node"][vnode].keys()):
+        for vnode in self.flow_values["node"].keys():
+            for snode in self.flow_values["node"][vnode].keys():
                 self.flow_values["node"][vnode][snode] = min(1.0, self.flow_values["node"][vnode][snode] * self.scaling_factor)
-        for eedge in list(self.flow_values["edge"].keys()):
+        for eedge in self.flow_values["edge"].keys():
             self.flow_values["edge"][eedge] = min(1.0, self.flow_values["edge"][eedge] * self.scaling_factor)
 
 

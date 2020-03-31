@@ -166,7 +166,7 @@ class GadgetContainerRequest(object):
         # set it & pass through to gadgets
         self.substrate = substrate
         self.substrate_resources = substrate.substrate_resources
-        for g in list(self.gadgets.values()):
+        for g in self.gadgets.values():
             g.set_substrate(substrate)
 
     def add_gadget(self, gadget):
@@ -459,7 +459,7 @@ class GadgetContainerRequest(object):
     def get_gadget_tree_graph(self):
         result = datamodel.Graph("{}_gadget_tree".format(self.name))
 
-        for g in list(self.gadgets.values()):
+        for g in self.gadgets.values():
             result.add_node(g.name)
 
         gadget_queue = {self.root_gadget}
@@ -620,7 +620,7 @@ class DecisionGadget(AbstractGadget):
         for ij, u_edge_dict in self.ext_graph.inter_layer_edges.items():
             if "edge_profit" in self.request.edge[ij]:
                 profit = self.request.edge[ij]["edge_profit"]
-                for ext_edge in list(u_edge_dict.values()):
+                for ext_edge in u_edge_dict.values():
                     obj_expr.addTerms(profit, self.gurobi_vars["edge_flow"][ext_edge])
         return obj_expr
 
@@ -696,7 +696,7 @@ class DecisionGadget(AbstractGadget):
         # collect the possible exits from the extended graph:
         extgraph_exits = set()
         for i in self.out_nodes:
-            extgraph_exits.update(list(self.ext_graph.sink_nodes[i].values()))
+            extgraph_exits.update(self.ext_graph.sink_nodes[i].values())
         next_ext_node = u_in_node_ext
         i_previous = None
         exit_node = None
@@ -1044,10 +1044,9 @@ class CactusGadget(AbstractGadget):
 
     def generate_flow_induction_at_root_constraint(self, model):
         root = self.ext_graph.root
-        root_source_nodes = list(self.ext_graph.source_nodes[root].keys())  # this list contains all source nodes associated with the request root
 
         expr = LinExpr([(-1.0, self.container_request.var_embedding_decision)] +
-                       [(1.0, self.gurobi_vars["node_flow"][root][u]) for u in root_source_nodes])
+                       [(1.0, self.gurobi_vars["node_flow"][root][u]) for u in self.ext_graph.source_nodes[root].keys()]) # this iterates over all source nodes associated with the request root
 
         constr_name = modelcreator.construct_name("flow_induction_root_gadget",
                                                   req_name="{}_{}".format(self.container_request.name, self.name),

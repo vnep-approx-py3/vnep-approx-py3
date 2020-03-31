@@ -186,9 +186,9 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
         """
         Create the Gurobi variables of every sub-LP.
         """
-        for req_edge_sub_lp in list(self.edge_sub_lp.values()):
-            for edge_sub_lp in list(req_edge_sub_lp.values()):
-                for sub_lp in list(edge_sub_lp.values()):
+        for req_edge_sub_lp in self.edge_sub_lp.values():
+            for edge_sub_lp in req_edge_sub_lp.values():
+                for sub_lp in edge_sub_lp.values():
                     sub_lp.extend_model_variables(self.model)
 
     def _get_valid_substrate_nodes(self, req, labels):
@@ -226,7 +226,7 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
             var_embedding_decision = self.var_embedding_decision[req]
             root_node = req.graph["root"]
             expr = [(-1.0, var_embedding_decision)]
-            for agg_var in list(self.var_aggregated_node_mapping[req][root_node].values()):
+            for agg_var in self.var_aggregated_node_mapping[req][root_node].values():
                 expr.append((1.0, agg_var))
 
             constr_name = construct_name(
@@ -239,9 +239,9 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
         """
         Create the Gurobi constraints of every sub-LP.
         """
-        for req_edge_sub_lp in list(self.edge_sub_lp.values()):
-            for edge_sub_lp in list(req_edge_sub_lp.values()):
-                for sub_lp in list(edge_sub_lp.values()):
+        for req_edge_sub_lp in self.edge_sub_lp.values():
+            for edge_sub_lp in req_edge_sub_lp.values():
+                for sub_lp in edge_sub_lp.values():
                     sub_lp.extend_model_constraints(self.model)
 
     def _create_node_mapping_constraints(self):
@@ -371,7 +371,7 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
             for i in req.nodes:
                 i_type = req.get_type(i)
                 i_demand = req.get_node_demand(i)
-                for u, var in list(self.var_aggregated_node_mapping[req][i].items()):
+                for u, var in self.var_aggregated_node_mapping[req][i].items():
                     node_res = i_type, u
                     node_load_constr_dict[node_res].append((i_demand, var))
 
@@ -398,8 +398,8 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
                 for uv in self.substrate.edges
             }
 
-            for comm_index_sub_lp_dict in list(edge_comm_index_sub_lp_dict.values()):
-                for sub_lp in list(comm_index_sub_lp_dict.values()):
+            for comm_index_sub_lp_dict in edge_comm_index_sub_lp_dict.values():
+                for sub_lp in comm_index_sub_lp_dict.values():
                     sub_lp.extend_edge_load_constraints(edge_load_constr_dict)
 
             for uv, expr in edge_load_constr_dict.items():
@@ -436,7 +436,7 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
             "integral_solution_{}".format(self.scenario.name),
             self.scenario
         )
-        for req, mapping_list in list(frac_sol.request_mapping.items()):
+        for req, mapping_list in frac_sol.request_mapping.items():
             for m in mapping_list:
                 if abs(1.0 - frac_sol.mapping_flows[m.name]) < self.decomposition_epsilon:
                     self.solution.add_mapping(req, m)
@@ -491,8 +491,7 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
         added_to_queue = {root}
         min_flow_for_mapping = self.var_embedding_decision[req].x - self._used_flow_embedding_decision[req]
 
-        u_root_candidates = list(self.var_node_mapping[req][root].keys())
-        for u in u_root_candidates:
+        for u in self.var_node_mapping[req][root].keys():
             for comm_index, var in self.var_node_mapping[req][root][u].items():
                 if var.x - self._used_flow_node_mapping[req][root][u][comm_index] > self.decomposition_epsilon:
                     mapping.map_node(root, u)
@@ -633,7 +632,7 @@ class CommutativityModelCreator(modelcreator.AbstractEmbeddingModelCreator):
         visited = set()
         root = req.graph.get("root", None)
         if root is None:
-            root = random.choice(list(req.nodes))
+            root = random.choice(req.nodes)
         dag_request.graph["root"] = root
 
         queue = deque([root])

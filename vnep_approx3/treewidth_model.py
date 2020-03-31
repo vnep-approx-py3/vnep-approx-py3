@@ -86,7 +86,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
         del self.node_bag_dict[node]
 
 
-        for req_node in list(self.complete_request_node_to_tree_node_map.keys()):
+        for req_node in self.complete_request_node_to_tree_node_map.keys():
             if node in self.complete_request_node_to_tree_node_map[req_node]:
                 self.complete_request_node_to_tree_node_map[req_node].remove(node)
             if self.representative_map[req_node] == node:
@@ -115,7 +115,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
 
     @property
     def width(self):
-        return max(len(bag) for bag in list(self.node_bag_dict.values())) - 1
+        return max(len(bag) for bag in self.node_bag_dict.values()) - 1
 
     def get_bag_intersection(self, t1, t2):
         return self.node_bag_dict[t1] & self.node_bag_dict[t2]
@@ -173,7 +173,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
         for (i, j) in req.edges:
             # Check that there is some overlap in the sets of representative nodes:
             found_covering_bag = False
-            for node_bag in list(self.node_bag_dict.values()):
+            for node_bag in self.node_bag_dict.values():
                 if i in node_bag and j in node_bag:
                     found_covering_bag = True
                     break
@@ -184,7 +184,7 @@ class TreeDecomposition(datamodel.UndirectedGraph):
     def _verify_intersection_property(self):
         # Check that subtrees induced by each request node are connected
         for req_node in self.representative_map:
-            subtree_nodes = {t for (t, bag) in list(self.node_bag_dict.items()) if req_node in bag}
+            subtree_nodes = {t for (t, bag) in self.node_bag_dict.items() if req_node in bag}
             start_node = self.get_representative(req_node)
             visited = set()
             q = {start_node}
@@ -328,8 +328,8 @@ class SmallSemiNiceTDArb(TreeDecomposition):
         :return:
         '''
 
-        edges = list(self.edges)
-        for edge in edges:
+        previous_edges = list(self.edges)
+        for edge in previous_edges:
             edge_as_list = list(edge)
             tail = edge_as_list[0]
             head = edge_as_list[1]
@@ -764,7 +764,7 @@ class ShortestValidPathsComputer_Flex(ShortestValidPathsComputer):
 
         self.preds = np.full((self.number_of_nodes, 32 + 1), -1, dtype=np.int32)
         self.distances = np.full((self.number_of_nodes, 32 + 1), np.inf, dtype=np.float64)
-        self.tau_modified_latencies = dict(list(zip(self.substrate.edges, [0] * len(self.substrate.edges))))
+        self.tau_modified_latencies = dict(zip(self.substrate.edges, [0] * len(self.substrate.edges)))
 
     def _handle_zero_delay_links(self, num_source_node, t):
         queue = [num_source_node]
@@ -913,7 +913,7 @@ class ShortestValidPathsComputer_Strict(ShortestValidPathsComputer):
     def _SPPP(self, lower, upper, eps, num_source_node, num_target_node):
         S = float(lower * eps) / (self.num_feasible_nodes + 1)
 
-        rescaled_costs = dict(list(zip(self.current_valid_edge_set, [int(float(self.edge_costs[x]) / S) + 1 for x in self.current_valid_edge_set])))
+        rescaled_costs = dict(zip(self.current_valid_edge_set, [int(float(self.edge_costs[x]) / S) + 1 for x in self.current_valid_edge_set]))
 
         U_tilde = int(upper / S) + self.num_feasible_nodes + 1
 
@@ -1580,7 +1580,7 @@ class OptimizedDynVMPNode(object):
 
 
     def initialize(self):
-        self.contained_request_nodes = sorted(list(self.ssntda.node_bag_dict[self.treenode]))
+        self.contained_request_nodes = sorted(self.ssntda.node_bag_dict[self.treenode])
         self.number_of_request_nodes = len(self.contained_request_nodes)
 
         self._reversed_contained_request_nodes = list(reversed(self.contained_request_nodes))
@@ -1690,14 +1690,14 @@ class OptimizedDynVMPNode(object):
             #EDGE COSTS
 
             edgeset_id_to_reqedges_mapping = self.vmrc.get_edgeset_id_to_reqedge_mapping()
-            edgeset_id_to_forgotten_reqedges_mapping = {edge_set_id : [reqedge for reqedge in edgeset_id_to_reqedges_mapping[edge_set_id] if reqedge in self.forgotten_virtual_elements_out_neigbor[1]] for edge_set_id in list(edgeset_id_to_reqedges_mapping.keys())}
+            edgeset_id_to_forgotten_reqedges_mapping = {edge_set_id : [reqedge for reqedge in edgeset_id_to_reqedges_mapping[edge_set_id] if reqedge in self.forgotten_virtual_elements_out_neigbor[1]] for edge_set_id in edgeset_id_to_reqedges_mapping.keys()}
 
             self.local_edge_cost_length = {edge_set_id: int(len(edgeset_id_to_forgotten_reqedges_mapping[edge_set_id])) for edge_set_id
-                                          in list(edgeset_id_to_reqedges_mapping.keys())}
+                                          in edgeset_id_to_reqedges_mapping.keys()}
 
             self.local_edge_cost_update_list = []
 
-            for edge_set_id in list(edgeset_id_to_reqedges_mapping.keys()):
+            for edge_set_id in edgeset_id_to_reqedges_mapping.keys():
                 if self.local_edge_cost_length[edge_set_id] > 0:
 
                     local_edge_cost_indices_array = np.full(
@@ -1846,12 +1846,12 @@ class OptimizedDynVMP(object):
         if snode_costs is None:
             self.snode_costs = {snode: 1.0 for snode in self.substrate.nodes}
         else:
-            self.snode_costs = {snode: snode_costs[snode] for snode in list(snode_costs.keys())}
+            self.snode_costs = {snode: snode_costs[snode] for snode in snode_costs.keys()}
 
         if sedge_costs is None:
             self.sedge_costs = {sedge: 1.0 for sedge in self.substrate.edges}
         else:
-            self.sedge_costs = {sedge: sedge_costs[sedge] for sedge in list(sedge_costs.keys())}
+            self.sedge_costs = {sedge: sedge_costs[sedge] for sedge in sedge_costs.keys()}
 
         self.sedge_latencies = {sedge: self.substrate.edge[sedge].get("latency", 1) for sedge in self.substrate.edges}
 
@@ -1859,7 +1859,7 @@ class OptimizedDynVMP(object):
                                [self.request.get_edge_demand(reqedge) for reqedge in self.request.edges])
 
         self._max_cost = max(
-            [cost for cost in list(self.snode_costs.values())] + [cost for cost in list(self.sedge_costs.values())])
+            [cost for cost in self.snode_costs.values()] + [cost for cost in self.sedge_costs.values()])
 
         self._mapping_cost_bound = self._max_demand * self._max_cost * 2.0 * len(self.request.edges) * len(self.substrate.edges)
 
@@ -1872,7 +1872,7 @@ class OptimizedDynVMP(object):
         self.svpc.compute()
 
 
-        self.sorted_snodes = sorted(list(self.substrate.nodes))
+        self.sorted_snodes = sorted(self.substrate.nodes)
         self.sorted_snode_index = {snode : self.sorted_snodes.index(snode) for snode in self.sorted_snodes}
 
         self.number_of_nodes = len(self.sorted_snodes)
@@ -2092,7 +2092,7 @@ class TreeDecompositionComputation(object):
 
     def _convert_graph_to_td_input_format(self):
         self.map_nodes_to_numeric_id = {node: str(idx) for (idx, node) in enumerate(sorted(self.graph.nodes), 1)}
-        self.map_numeric_id_to_nodes = {v: k for (k, v) in list(self.map_nodes_to_numeric_id.items())}
+        self.map_numeric_id_to_nodes = {v: k for (k, v) in self.map_nodes_to_numeric_id.items()}
         lines = ["p tw {} {}".format(len(self.graph.nodes), len(self.graph.edges))]
         for edge in sorted(self.graph.edges):
             i, j = edge
@@ -2281,7 +2281,7 @@ class SeparationLP_OptDynVMP(object):
         if len(self.substrate.get_types()) > 1:
             raise ValueError("Can only handle a single node type.")
 
-        self.node_type = list(self.substrate.get_types())[0]
+        self.node_type = next(iter(self.substrate.get_types()))
         self.snodes = self.substrate.nodes
         self.sedges = self.substrate.edges
 
@@ -2683,7 +2683,7 @@ class RandRoundSepLPOptDynVMPCollectionResult(modelcreator.AlgorithmResult):
 
     def add_solution(self, rounding_order, lp_recomputation_mode, solution):
         identifier = (lp_recomputation_mode, rounding_order)
-        if identifier not in list(self.solutions.keys()):
+        if identifier not in self.solutions:
             self.solutions[identifier] = []
         solution_index = len(self.solutions[identifier])
         self.solutions[identifier].append(solution)
@@ -2698,7 +2698,7 @@ class RandRoundSepLPOptDynVMPCollectionResult(modelcreator.AlgorithmResult):
 
 
     def _cleanup_references_raw(self, original_scenario):
-        for identifier in list(self.solutions.keys()):
+        for identifier in self.solutions:
             #search for best solution and remove mapping information of all other solutions
             list_of_solutions = self.solutions[identifier]
             best_solution = max(list_of_solutions, key= lambda x: x.profit)
@@ -2742,7 +2742,7 @@ class RandRoundSepLPOptDynVMPCollectionResult(modelcreator.AlgorithmResult):
 
     def _get_solution_overview(self):
         result = "\n\t{:^10s} | {:^40s} {:^20s} | {:^8s}\n".format("PROFIT", "LP Recomputation Mode", "Rounding Order", "INDEX")
-        for identifier in list(self.solutions.keys()):
+        for identifier in self.solutions:
             for solution_index, solution in enumerate(self.solutions[identifier]):
                 result += "\t" + "{:^10.5f} | {:^40s} {:^20s} | {:<8d}\n".format(solution.profit,
                                                                                  identifier[0].value,
@@ -2866,7 +2866,7 @@ class RandRoundSepLPOptDynVMPCollection(object):
         if len(self.substrate.get_types()) > 1:
             raise ValueError("Can only handle a single node type.")
 
-        self.node_type = list(self.substrate.get_types())[0]
+        self.node_type = next(iter(self.substrate.get_types()))
         self.snodes = self.substrate.nodes
         self.sedges = self.substrate.edges
 
@@ -2977,7 +2977,7 @@ class RandRoundSepLPOptDynVMPCollection(object):
             #handle allocations
             corresponding_allocation = current_new_allocations[index]
             for sres, alloc in corresponding_allocation.items():
-                if sres not in list(self.capacity_constraints.keys()):
+                if sres not in self.capacity_constraints:
                     continue
                 constr = self.capacity_constraints[sres]
                 self.model.chgCoeff(constr, new_var, alloc)
@@ -3331,10 +3331,10 @@ class RandRoundSepLPOptDynVMPCollection(object):
         if rounding_order == RoundingOrder.RANDOM:
             random.shuffle(req_list)
         elif rounding_order == RoundingOrder.STATIC_REQ_PROFIT:
-            req_list = list(sorted(self.scenario.requests, key=lambda r: r.profit, reverse=True))
+            req_list = sorted(self.scenario.requests, key=lambda r: r.profit, reverse=True)
         elif rounding_order == RoundingOrder.ACHIEVED_REQ_PROFIT:
             cum_embedding_value_of_req = {req : sum(var.X for var in self.mapping_variables[req]) for req in self.scenario.requests}
-            req_list = list(sorted(self.scenario.requests, key=lambda r: r.profit * cum_embedding_value_of_req[r], reverse=True))
+            req_list = sorted(self.scenario.requests, key=lambda r: r.profit * cum_embedding_value_of_req[r], reverse=True)
 
         scenario_solution = solutions.IntegralScenarioSolution(name="", scenario=self.scenario)
 
@@ -3367,7 +3367,7 @@ class RandRoundSepLPOptDynVMPCollection(object):
                 if self.check_whether_mapping_would_obey_resource_violations(A, self.allocations_of_mappings[req][chosen_mapping[0]]):
                     B += req.profit
                     for res in self.substrate_resources:
-                        if res in list(self.allocations_of_mappings[req][chosen_mapping[0]].keys()):
+                        if res in self.allocations_of_mappings[req][chosen_mapping[0]]:
                             A[res] += self.allocations_of_mappings[req][chosen_mapping[0]][res]
 
                     if lp_computation_mode != LPRecomputationMode.NONE:
@@ -3817,7 +3817,7 @@ class _TreewidthModelCreator(modelcreator.AbstractEmbeddingModelCreator):
     def _create_y_variables(self, req):
         td = self.tree_decompositions[req.name]
         self.y_vars[req.name] = {}
-        for bag_id, bag_nodes in list(td.node_bag_dict.items()):
+        for bag_id, bag_nodes in td.node_bag_dict.items():
             self.y_vars[req.name][bag_id] = {}
             for a in mapping_space(req, self.substrate, sorted(bag_nodes)):
                 variable_name = construct_name_tw_lp("bag_mapping", req_name=req.name, bag=bag_id, bag_mapping=a)
@@ -3852,7 +3852,7 @@ class _TreewidthModelCreator(modelcreator.AbstractEmbeddingModelCreator):
             constr_name = construct_name_tw_lp("embed_bags_equally", req_name=req.name, bag=bag)
             expr = LinExpr(
                 [(-1.0, self.var_embedding_decision[req])] +
-                [(1.0, var) for bag_mapping, var in list(self.y_vars[req.name][bag].items())]
+                [(1.0, var) for bag_mapping, var in self.y_vars[req.name][bag].items()]
             )
             self.model.addConstr(LinExpr(expr), GRB.EQUAL, 0.0, constr_name)
 

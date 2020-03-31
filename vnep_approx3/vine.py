@@ -65,7 +65,7 @@ class ViNESettingsFactory(object):
                                    lp_objective=lp_objective,
                                    rounding_procedure=rounding_procedure)
 
-        if temp_result in list(ViNESettingsFactory._known_vine_settings.keys()):
+        if temp_result in ViNESettingsFactory._known_vine_settings.keys():
             return ViNESettingsFactory._known_vine_settings[temp_result]
         else:
             ViNESettingsFactory._known_vine_settings[temp_result] = temp_result
@@ -75,7 +75,7 @@ class ViNESettingsFactory(object):
     def get_vine_settings_from_settings(vine_settings):
         ViNESettingsFactory.check_vine_settings(vine_settings)
 
-        if vine_settings in list(ViNESettingsFactory._known_vine_settings.keys()):
+        if vine_settings in ViNESettingsFactory._known_vine_settings.keys():
             return ViNESettingsFactory._known_vine_settings[vine_settings]
         else:
             ViNESettingsFactory._known_vine_settings[vine_settings] = vine_settings
@@ -682,7 +682,7 @@ class OfflineViNEResultCollection(mc.AlgorithmResult):
     def add_solution(self, vine_settings, offline_vine_result):
         if vine_settings not in self.vine_settings_list:
             raise ValueError("VineSettings diverge from given vine_settings")
-        if vine_settings not in list(self.solutions.keys()):
+        if vine_settings not in self.solutions.keys():
             self.solutions[vine_settings] = []
         if self.scenario != offline_vine_result.solution.scenario:
             raise ValueError("Seems to be another scenario!")
@@ -699,7 +699,7 @@ class OfflineViNEResultCollection(mc.AlgorithmResult):
 
 
     def _cleanup_references_raw(self, original_scenario):
-        for vine_settings in list(self.solutions.keys()):
+        for vine_settings in self.solutions.keys():
             for (result_index, result) in self.solutions[vine_settings]:
                 for own_req, original_request in zip(self.scenario.requests, original_scenario.requests):
                     assert own_req.nodes == original_request.nodes
@@ -727,7 +727,7 @@ class OfflineViNEResultCollection(mc.AlgorithmResult):
     def _get_solution_overview(self):
         result = "\n\t{:^10s} | {:^5s} {:^20s} {:^5s} | {:^8s}\n".format("PROFIT", "MODEL", "LP-OBJECTIVE", "PROC", "INDEX")
         for vine_settings in self.vine_settings_list:
-            if vine_settings in list(self.solutions.keys()):
+            if vine_settings in self.solutions.keys():
                 for solution_index, solution in self.solutions[vine_settings]:
                     result += "\t" + "{:^10.5f} | {:^5s} {:^20s} {:^5s} | {:<8d}\n".format(solution.profit,
                                                                                       vine_settings.edge_embedding_model.value,
