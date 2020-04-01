@@ -2,7 +2,7 @@
 Some valid tree decompositions for example requests.
 
 """
-from vnep_approx3 import treewidth_model
+from vnep_approx import treewidth_model
 from . import request_test_data
 
 

@@ -27,7 +27,7 @@ from random import Random
 
 from gurobipy import GRB, LinExpr
 
-from alib3 import modelcreator
+from alib import modelcreator
 from . import modelcreator_ecg_decomposition
 
 random = Random("randomized_rounding")

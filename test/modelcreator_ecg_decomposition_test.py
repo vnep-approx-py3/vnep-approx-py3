@@ -4,8 +4,8 @@ import pytest
 import numpy as np
 from gurobipy import GRB
 
-from alib3 import datamodel, mip, modelcreator, scenariogeneration, solutions
-from vnep_approx3 import extendedcactusgraph, modelcreator_ecg_decomposition
+from alib import datamodel, mip, modelcreator, scenariogeneration, solutions
+from vnep_approx import extendedcactusgraph, modelcreator_ecg_decomposition
 
 
 class TestCactusModelCreator:

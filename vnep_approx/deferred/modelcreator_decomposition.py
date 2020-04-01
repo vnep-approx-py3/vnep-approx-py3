@@ -23,7 +23,7 @@
 
 from gurobipy import GRB, LinExpr
 
-from alib3 import solutions, modelcreator
+from alib import solutions, modelcreator
 from . import extendedgraph
 
 

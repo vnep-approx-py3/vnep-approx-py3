@@ -3,9 +3,9 @@ import random
 
 import pytest
 
-from alib3 import datamodel, modelcreator
+from alib import datamodel, modelcreator
 from commutativity_model_test_data import create_request, filter_requests_by_tags
-from vnep_approx3 import commutativity_model
+from vnep_approx import commutativity_model
 
 i, j, k = "ijk"
 ij = i, j

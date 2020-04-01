@@ -1,4 +1,4 @@
-from alib3 import datamodel, scenariogeneration
+from alib import datamodel, scenariogeneration
 
 
 def create_test_request(request_id, reverse_edges=None, set_allowed_nodes=True):

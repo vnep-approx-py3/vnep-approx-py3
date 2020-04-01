@@ -1,7 +1,7 @@
 __author__ = 'Tom Koch (tkoch@inet.tu-berlin.de)'
 
-from alib3 import datamodel, test_utils
-from vnep_approx3.deferred import modelcreator_decomposition as mc
+from alib import datamodel, test_utils
+from vnep_approx.deferred import modelcreator_decomposition as mc
 
 
 class TestModelCreator:

@@ -1,11 +1,11 @@
 import pytest
-from vnep_approx3 import treewidth_model
+from vnep_approx import treewidth_model
 
 import numpy as np
 
-from alib3 import mip
-from alib3 import datamodel as dm
-from alib3 import util
+from alib import mip
+from alib import datamodel as dm
+from alib import util
 from .test_data.request_test_data import create_test_request
 from .test_data.substrate_test_data import create_test_substrate_topology_zoo
 from .test_data.substrate_test_data import create_test_substrate_topology_zoo

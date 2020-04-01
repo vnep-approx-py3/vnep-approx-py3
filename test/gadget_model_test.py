@@ -2,8 +2,8 @@ import random
 
 import pytest
 
-from alib3 import datamodel, scenariogeneration, solutions, util
-from vnep_approx3 import gadget_model, modelcreator_ecg_decomposition
+from alib import datamodel, scenariogeneration, solutions, util
+from vnep_approx import gadget_model, modelcreator_ecg_decomposition
 
 
 def get_test_triangle_substrate():

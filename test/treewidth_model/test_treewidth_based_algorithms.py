@@ -1,7 +1,7 @@
 import pytest
-from vnep_approx3 import treewidth_model
+from vnep_approx import treewidth_model
 
-from alib3 import datamodel
+from alib import datamodel
 from .test_data.request_test_data import create_test_request, example_requests, create_random_test_request
 from .test_data.substrate_test_data import create_test_substrate_topology_zoo
 

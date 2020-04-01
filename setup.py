@@ -2,7 +2,7 @@ from setuptools import setup
 
 install_requires = [
     # "gurobipy",  # install this manually
-    # "alib3",
+    # "alib",
     # "basemap",  # install this manually
     "click",
     "matplotlib",
@@ -10,13 +10,13 @@ install_requires = [
 ]
 
 setup(
-    name="vnep-approx3",
+    name="vnep-approx",
     # version="0.1",
-    packages=["vnep_approx3"],
+    packages=["vnep_approx"],
     install_requires=install_requires,
     entry_points={
         "console_scripts": [
-            "vnep-approx3 = vnep_approx3.cli:cli",
+            "vnep-approx = vnep_approx.cli:cli",
         ]
     }
 )

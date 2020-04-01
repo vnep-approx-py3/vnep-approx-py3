@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = vnep-approx3
+SPHINXPROJ    = vnep-approx
 SOURCEDIR     = .
 BUILDDIR      = _build
 

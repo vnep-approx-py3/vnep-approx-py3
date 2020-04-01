@@ -1,7 +1,7 @@
 ``commutativity_model``
 =======================
 
-.. automodule:: vnep_approx3.commutativity_model
+.. automodule:: vnep_approx.commutativity_model
 
 
 In the generalized commutativity model, it must be ensured that node mappings
@@ -90,19 +90,19 @@ In edge sub-LPs:
 Classes
 -------
 
-.. autoexception:: vnep_approx3.commutativity_model.CommutativityModelError
+.. autoexception:: vnep_approx.commutativity_model.CommutativityModelError
 
-.. autoclass:: vnep_approx3.commutativity_model.CommutativityModelCreator
+.. autoclass:: vnep_approx.commutativity_model.CommutativityModelCreator
   :members:
   :undoc-members:
   :private-members:
 
-.. autoclass:: vnep_approx3.commutativity_model.EdgeSubLP
+.. autoclass:: vnep_approx.commutativity_model.EdgeSubLP
   :members:
   :undoc-members:
   :private-members:
 
-.. autoclass:: vnep_approx3.commutativity_model.CommutativityLabels
+.. autoclass:: vnep_approx.commutativity_model.CommutativityLabels
   :members:
   :undoc-members:
   :private-members:

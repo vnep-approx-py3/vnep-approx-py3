@@ -8,7 +8,7 @@ import logging
 import datetime
 from time import sleep
 
-import alib3.util as util
+import alib.util as util
 
 
 @pytest.fixture

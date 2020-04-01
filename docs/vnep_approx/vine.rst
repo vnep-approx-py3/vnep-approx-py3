@@ -1,6 +1,6 @@
 ``vine``
 ====================================
 
-.. automodule:: vnep_approx3.vine
+.. automodule:: vnep_approx.vine
   :members:
   :undoc-members:

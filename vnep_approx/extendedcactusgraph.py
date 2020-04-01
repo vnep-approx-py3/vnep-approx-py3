@@ -24,7 +24,7 @@
 from collections import deque, namedtuple
 from random import Random
 
-from alib3 import datamodel, util
+from alib import datamodel, util
 
 random = Random("extended_cactus_graph")
 

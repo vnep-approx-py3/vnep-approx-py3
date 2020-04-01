@@ -1,4 +1,4 @@
-from alib3 import datamodel, scenariogeneration, solutions, util
+from alib import datamodel, scenariogeneration, solutions, util
 
 
 def create_test_substrate(substrate_id,

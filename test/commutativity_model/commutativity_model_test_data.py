@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from alib3 import datamodel
+from alib import datamodel
 
 
 def filter_requests_by_tags(*tag_groups):

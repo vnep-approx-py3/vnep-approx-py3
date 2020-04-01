@@ -1,6 +1,6 @@
 ``extendedcactusgraph``
 =======================
 
-.. automodule:: vnep_approx3.extendedcactusgraph
+.. automodule:: vnep_approx.extendedcactusgraph
   :members:
   :undoc-members:

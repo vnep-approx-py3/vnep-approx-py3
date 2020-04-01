@@ -25,7 +25,7 @@ import time
 
 from gurobipy import GRB, LinExpr
 
-from alib3 import solutions, util, modelcreator, datamodel
+from alib import solutions, util, modelcreator, datamodel
 from . import extendedcactusgraph
 from collections import deque
 

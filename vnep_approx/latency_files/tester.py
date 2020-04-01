@@ -2,15 +2,15 @@ import random
 import time
 import numpy as np
 
-from alib3 import datamodel
+from alib import datamodel
 from test.treewidth_model.test_data.request_test_data import example_requests
-from vnep_approx3.treewidth_model import ValidMappingRestrictionComputer
-from vnep_approx3.treewidth_model import ShortestValidPathsComputer_NoLatencies as SVPC_given
-from vnep_approx3.latency_files.lorenz import ShortestValidPathsComputerLORENZ as SVPC_Lorenz
-from vnep_approx3.latency_files.goel import ShortestValidPathsComputer as SVPC_goel
-from vnep_approx3.latency_files.SVPC_all import ShortestValidPathsComputer as SVPC_all
+from vnep_approx.treewidth_model import ValidMappingRestrictionComputer
+from vnep_approx.treewidth_model import ShortestValidPathsComputer_NoLatencies as SVPC_given
+from vnep_approx.latency_files.lorenz import ShortestValidPathsComputerLORENZ as SVPC_Lorenz
+from vnep_approx.latency_files.goel import ShortestValidPathsComputer as SVPC_goel
+from vnep_approx.latency_files.SVPC_all import ShortestValidPathsComputer as SVPC_all
 
-from vnep_approx3.latency_files.test_results import verify_correct_result
+from vnep_approx.latency_files.test_results import verify_correct_result
 
 
 

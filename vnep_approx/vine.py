@@ -6,11 +6,11 @@ from gurobipy import GRB, LinExpr
 import itertools
 from collections import namedtuple
 
-from alib3 import datamodel as dm
-from alib3 import mip as mip
-from alib3 import modelcreator as mc
-from alib3 import solutions
-from alib3 import util
+from alib import datamodel as dm
+from alib import mip as mip
+from alib import modelcreator as mc
+from alib import solutions
+from alib import util
 
 
 @enum.unique

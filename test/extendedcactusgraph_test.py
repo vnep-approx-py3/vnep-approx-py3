@@ -1,7 +1,7 @@
 import pytest
 
-from alib3 import datamodel
-from vnep_approx3.extendedcactusgraph import ExtendedCactusGraph, ExtendedCactusGraphError
+from alib import datamodel
+from vnep_approx.extendedcactusgraph import ExtendedCactusGraph, ExtendedCactusGraphError
 
 
 class TestExtendedCactusGraph:
@@ -336,7 +336,7 @@ class TestExtendedCactusGraph:
 
         eg = ExtendedCactusGraph(req, sub)
 
-        from alib3.util import get_graph_viz_string
+        from alib.util import get_graph_viz_string
         print(get_graph_viz_string(eg))
         should_not_exist = [
             (

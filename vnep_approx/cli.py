@@ -25,8 +25,8 @@ import os
 
 import click
 
-import alib3.cli
-from alib3 import run_experiment, util
+import alib.cli
+from alib import run_experiment, util
 from . import modelcreator_ecg_decomposition, randomized_rounding_triumvirate
 from . import treewidth_model
 from . import vine
@@ -49,7 +49,7 @@ def initialize_logger(filename, log_level_print, log_level_file, allow_override=
 @click.argument('parameters', type=click.File('r'))
 @click.option('--threads', default=1)
 def generate_scenarios(scenario_output_file, parameters, threads):
-    alib3.cli.f_generate_scenarios(scenario_output_file, parameters, threads)
+    alib.cli.f_generate_scenarios(scenario_output_file, parameters, threads)
 
 
 @cli.command()

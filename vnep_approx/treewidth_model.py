@@ -43,7 +43,7 @@ except ImportError:
 
 import gurobipy
 from gurobipy import GRB, LinExpr
-from alib3 import datamodel, modelcreator, solutions, util
+from alib import datamodel, modelcreator, solutions, util
 
 from . import randomized_rounding_triumvirate as rrt
 
@@ -2534,7 +2534,7 @@ class SeparationLP_OptDynVMP(object):
 
     ###
     ###     GUROBI SETTINGS
-    ###     The following is copy-pasted from the basic modelcreator in the alib3, as the separation approach
+    ###     The following is copy-pasted from the basic modelcreator in the alib, as the separation approach
     ###     breaks the structure of computing a simple LP or IP.
     ###
 
@@ -3435,7 +3435,7 @@ class RandRoundSepLPOptDynVMPCollection(object):
 
     ###
     ###     GUROBI SETTINGS
-    ###     The following is copy-pasted from the basic modelcreator in the alib3, as the separation approach
+    ###     The following is copy-pasted from the basic modelcreator in the alib, as the separation approach
     ###     breaks the structure of computing a simple LP or IP.
     ###
 
@@ -3728,7 +3728,7 @@ class DynVMPAlgorithm(object):
         return cost
 
     def shortest_path(self, start, target, min_capacity):
-        # TODO: could add this to the alib3 by extending Graph.initialize_shortest_paths_costs()
+        # TODO: could add this to the alib by extending Graph.initialize_shortest_paths_costs()
         # Dijkstra algorithm (https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Pseudocode)
         distance = {node: INFINITY for node in self.substrate.nodes}
         prev = {u: None for u in self.substrate.nodes}

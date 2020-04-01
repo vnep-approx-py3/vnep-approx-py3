@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# vnep-approx3 documentation build configuration file, created by
+# vnep-approx documentation build configuration file, created by
 # sphinx-quickstart on Mon Mar 13 22:35:04 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'vnep-approx3'
+project = 'vnep-approx'
 copyright = '2017-2020, FG INET@TU Berlin'
 author = 'Matthias Rost'
 
@@ -100,7 +100,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'vnep-approx3-doc'
+htmlhelp_basename = 'vnep-approx-doc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -141,7 +141,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'documentation.tex', 'vnep-approx3 Documentation',
+    (master_doc, 'documentation.tex', 'vnep-approx Documentation',
      'INET/TU Berlin', 'manual'),
 ]
 
@@ -151,7 +151,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'vnep-approx3', 'vnep-approx3 Documentation',
+    (master_doc, 'vnep-approx', 'vnep-approx Documentation',
      [author], 1)
 ]
 
@@ -162,8 +162,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'vnep-approx3', 'vnep-approx3 Documentation',
-     author, 'vnep-approx3', 'One line description of project.',
+    (master_doc, 'vnep-approx', 'vnep-approx Documentation',
+     author, 'vnep-approx', 'One line description of project.',
      'Miscellaneous'),
 ]
 

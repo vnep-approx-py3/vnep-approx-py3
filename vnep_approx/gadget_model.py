@@ -29,7 +29,7 @@ import itertools
 
 from gurobipy import GRB, LinExpr
 
-from alib3 import datamodel, modelcreator, solutions
+from alib import datamodel, modelcreator, solutions
 from . import extendedcactusgraph, modelcreator_ecg_decomposition
 
 
@@ -539,7 +539,7 @@ class AbstractGadget(object):
 
     def verify_mapping(self, mapping):
         """
-        Perform certain sanity checks usually performed by the :class:`alib3.solutions.Mapping`
+        Perform certain sanity checks usually performed by the :class:`alib.solutions.Mapping`
         class.
 
         :param solutions.Mapping mapping: the request mapping

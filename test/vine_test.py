@@ -3,9 +3,9 @@ import pytest
 import warnings
 
 import vine_test_data as vtd
-from vnep_approx3 import vine
+from vnep_approx import vine
 
-from alib3 import datamodel, solutions
+from alib import datamodel, solutions
 
 
 

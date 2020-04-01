@@ -1,7 +1,7 @@
 ``gadget_model``
 ================
 
-.. automodule:: vnep_approx3.gadget_model
+.. automodule:: vnep_approx.gadget_model
   :members:
   :undoc-members:
 

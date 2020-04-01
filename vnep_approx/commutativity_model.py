@@ -30,7 +30,7 @@ from random import Random
 
 import gurobipy
 
-from alib3 import datamodel, modelcreator, solutions
+from alib import datamodel, modelcreator, solutions
 
 random = Random("extended_cactus_graph")
 

@@ -1,6 +1,6 @@
 import pytest
 
-from vnep_approx3 import treewidth_model
+from vnep_approx import treewidth_model
 from .test_data.request_test_data import create_test_request, example_requests
 
 from .test_data.tree_decomposition_test_data import PACE_INPUT_FORMAT

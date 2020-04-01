@@ -1,10 +1,10 @@
 import gurobipy
 import pytest
 
-from alib3 import datamodel
+from alib import datamodel
 from commutativity_model_test_data import example_requests, create_request, filter_requests_by_tags
 
-from vnep_approx3 import commutativity_model
+from vnep_approx import commutativity_model
 
 pytestmark = pytest.mark.usefixtures("mock_gurobi")
 

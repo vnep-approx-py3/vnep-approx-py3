@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.basemap import Basemap as Basemap
 
-from alib3 import scenariogeneration
+from alib import scenariogeneration
 from . import extendedgraph
 
 MapCoordinate = namedtuple("MapCoordinate", "lon lat")
@@ -278,8 +278,8 @@ class ExtendedGraphVisualizer(object):
 
 
 def example():
-    from alib3 import datamodel
-    reader = scenariogeneration.TopologyZooReader(path="../../github-alib3/data/topologyZoo")
+    from alib import datamodel
+    reader = scenariogeneration.TopologyZooReader(path="../../github-alib/data/topologyZoo")
     substrate = reader.read_from_yaml(
         dict(topology="Aarnet",
              edge_capacity=1.0,
