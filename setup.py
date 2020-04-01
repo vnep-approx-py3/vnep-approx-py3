@@ -2,8 +2,8 @@ from setuptools import setup
 
 install_requires = [
     # "gurobipy",  # install this manually
-    # "alib",
-    # "basemap",  # install this manually
+    # "alib",      # install this manually
+    # "basemap",   # install this manually
     "click",
     "matplotlib",
     "numpy"
