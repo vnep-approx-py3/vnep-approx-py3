@@ -538,7 +538,7 @@ class ModelCreatorCactusDecomposition(modelcreator.AbstractEmbeddingModelCreator
 
             if self.pickle_decomposition_tasks:
                 d.logger = None
-                with open(self.scenario.name + "_decomp_task_" + str(req_index) + ".pickle", "w") as f:
+                with open(self.scenario.name + "_decomp_task_" + str(req_index) + ".pickle", "wb") as f:
                     pickle.dump(d, f)
                 d.logger=self.logger
 
