@@ -39,12 +39,13 @@ def cli():
     pass
 
 def initialize_logger(filename, log_level_print, log_level_file, allow_override=False):
-    log_level_print = logging._levelNames[log_level_print.upper()]
-    log_level_file = logging._levelNames[log_level_file.upper()]
+    log_level_print = logging._nameToLevel[log_level_print.upper()]
+    log_level_file = logging._nameToLevel[log_level_file.upper()]
     util.initialize_root_logger(filename, log_level_print, log_level_file, allow_override=allow_override)
 
 
-@cli.command()
+
+@cli.command("generate-scenarios", short_help="generates scenarios according to a yaml file; simply calls the functionality of the alib")
 @click.argument('scenario_output_file')
 @click.argument('parameters', type=click.File('r'))
 @click.option('--threads', default=1)
@@ -52,7 +53,7 @@ def generate_scenarios(scenario_output_file, parameters, threads):
     alib.cli.f_generate_scenarios(scenario_output_file, parameters, threads)
 
 
-@cli.command()
+@cli.command("start-experiment", short_help="starts an experiment specified in a yaml file; uses essentially the functionality of the alib but loads several algorithm contained in this library")
 @click.argument('experiment_yaml', type=click.File('r'))
 @click.argument('min_scenario_index', type=click.INT)
 @click.argument('max_scenario_index', type=click.INT)
