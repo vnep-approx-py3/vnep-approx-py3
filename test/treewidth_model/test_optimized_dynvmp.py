@@ -138,7 +138,6 @@ def test_opt_dynvmp(request_id):
     gurobi.init_model_creator()
     gurobi.model.setParam("LogToConsole", 1)
     gurobi.compute_integral_solution()
-    gurobi.model.write("foo.lp")
 
     td_comp = treewidth_model.TreeDecompositionComputation(req)
     tree_decomp = td_comp.compute_tree_decomposition()
